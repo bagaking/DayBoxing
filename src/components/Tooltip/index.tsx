@@ -1,30 +1,71 @@
 import React, { useEffect, useState, useRef } from "react";
 import { TooltipProps } from "../../types";
 
-export const Tooltip: React.FC<TooltipProps> = ({ data, position, theme }) => {
+export const Tooltip: React.FC<TooltipProps> = ({
+  data,
+  position: initialPosition,
+  theme,
+}) => {
   const [isVisible, setIsVisible] = useState(false);
   const [isLeaving, setIsLeaving] = useState(false);
   const timeoutRef = useRef<number>();
   const prevDataRef = useRef(data);
+  const prevPositionRef = useRef(initialPosition);
   const [tooltipData, setTooltipData] = useState(data);
+  const [currentPosition, setCurrentPosition] = useState(initialPosition);
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
   useEffect(() => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+
     const hasDataChanged =
       data?.type !== prevDataRef.current?.type ||
       data?.hour !== prevDataRef.current?.hour ||
-      data?.date !== prevDataRef.current?.date ||
-      data?.segment?.type !== prevDataRef.current?.segment?.type;
+      data?.date !== prevDataRef.current?.date;
 
-    if (data && hasDataChanged) {
-      setTooltipData(data);
+    const hasPositionChanged =
+      initialPosition.x !== prevPositionRef.current.x ||
+      initialPosition.y !== prevPositionRef.current.y;
+
+    if (data) {
+      if ((hasDataChanged || hasPositionChanged) && isVisible) {
+        setIsTransitioning(true);
+
+        if (hasDataChanged) {
+          setTooltipData(data);
+        }
+
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            setCurrentPosition({
+              x: initialPosition.x + 15,
+              y: initialPosition.y + 15,
+            });
+          });
+        });
+
+        timeoutRef.current = window.setTimeout(() => {
+          setIsTransitioning(false);
+        }, 300);
+      } else {
+        setCurrentPosition({
+          x: initialPosition.x + 15,
+          y: initialPosition.y + 15,
+        });
+        setTooltipData(data);
+      }
+
       setIsLeaving(false);
       setIsVisible(true);
       prevDataRef.current = data;
-    } else if (!data) {
+      prevPositionRef.current = initialPosition;
+    } else {
       setIsLeaving(true);
       timeoutRef.current = window.setTimeout(() => {
         setIsVisible(false);
-      }, 150);
+      }, 300);
     }
 
     return () => {
@@ -32,7 +73,7 @@ export const Tooltip: React.FC<TooltipProps> = ({ data, position, theme }) => {
         clearTimeout(timeoutRef.current);
       }
     };
-  }, [data]);
+  }, [data, initialPosition]);
 
   useEffect(() => {
     if (tooltipData && isVisible) {
@@ -46,13 +87,24 @@ export const Tooltip: React.FC<TooltipProps> = ({ data, position, theme }) => {
     return theme.colors[type as keyof typeof theme.colors] || theme.colors.base;
   };
 
+  const formatHour = (hour: number) => {
+    const normalizedHour = hour < 0 ? hour + 24 : hour;
+    const displayHour = String(Math.abs(normalizedHour)).padStart(2, "0");
+    const isPreviousDay = hour < 0;
+
+    return {
+      displayHour,
+      isPreviousDay,
+    };
+  };
+
   return (
     <div
       className="day-boxing-tooltip"
       style={{
         position: "fixed",
-        left: position.x + 15,
-        top: position.y + 15,
+        left: currentPosition.x,
+        top: currentPosition.y,
         background: "rgba(255, 255, 255, 0.98)",
         color: theme.colors.text,
         padding: "20px",
@@ -64,7 +116,9 @@ export const Tooltip: React.FC<TooltipProps> = ({ data, position, theme }) => {
         backdropFilter: "blur(8px)",
         opacity: isLeaving ? 0 : 1,
         transform: isLeaving ? "translateY(10px)" : "translateY(0)",
-        transition: "all 0.2s ease",
+        transition: `all 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+                     transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)`,
+        pointerEvents: isTransitioning ? "none" : "auto",
       }}
     >
       <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
@@ -82,13 +136,36 @@ export const Tooltip: React.FC<TooltipProps> = ({ data, position, theme }) => {
               fontSize: "20px",
               color: "#fff",
               fontWeight: "bold",
+              position: "relative",
             }}
           >
-            {tooltipData.hour}
+            {formatHour(tooltipData.hour).displayHour}
+            {formatHour(tooltipData.hour).isPreviousDay && (
+              <div
+                style={{
+                  position: "absolute",
+                  top: -8,
+                  right: -8,
+                  backgroundColor: theme.colors.background,
+                  color: theme.colors.text,
+                  fontSize: "10px",
+                  padding: "2px 4px",
+                  borderRadius: "4px",
+                  fontWeight: "normal",
+                }}
+              >
+                -1d
+              </div>
+            )}
           </div>
           <div>
             <div
-              style={{ fontSize: "20px", fontWeight: 600, marginBottom: "4px" }}
+              style={{
+                fontSize: "20px",
+                fontWeight: 600,
+                marginBottom: "4px",
+                color: "rgba(0,0,0,0.6)",
+              }}
             >
               {`${tooltipData.hour}:00`}
             </div>
@@ -123,6 +200,7 @@ export const Tooltip: React.FC<TooltipProps> = ({ data, position, theme }) => {
               backgroundColor: "rgba(0,0,0,0.02)",
               borderRadius: theme.borderRadius,
               border: "1px solid rgba(0,0,0,0.05)",
+              color: theme.colors.text,
             }}
           >
             <div style={{ marginBottom: "12px" }}>
@@ -142,6 +220,7 @@ export const Tooltip: React.FC<TooltipProps> = ({ data, position, theme }) => {
                   display: "flex",
                   alignItems: "center",
                   gap: "8px",
+                  color: theme.colors.text,
                 }}
               >
                 <span
@@ -149,6 +228,7 @@ export const Tooltip: React.FC<TooltipProps> = ({ data, position, theme }) => {
                     width: "10px",
                     height: "10px",
                     borderRadius: "50%",
+                    color: "rgba(0,0,0)",
                     backgroundColor: getSegmentColor(
                       tooltipData.segment.mainType
                     ),

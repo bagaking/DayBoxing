@@ -1,4 +1,10 @@
-import React, { useState, useCallback, useMemo, useEffect } from "react";
+import React, {
+  useState,
+  useCallback,
+  useMemo,
+  useEffect,
+  useRef,
+} from "react";
 import { DayBoxingProps, HourTooltipData, HourChangeEvent } from "../types";
 import { defaultTheme } from "../theme/default";
 import { useDayBoxingData } from "../hooks/useDayBoxingData";
@@ -29,6 +35,7 @@ export const DayBoxing: React.FC<DayBoxingProps> = ({
     data: HourTooltipData;
     position: { x: number; y: number };
   } | null>(null);
+  const tooltipTimeoutRef = useRef<number>();
 
   const { data: daysData, updateHour } = useDayBoxingData({
     patterns,
@@ -65,6 +72,41 @@ export const DayBoxing: React.FC<DayBoxingProps> = ({
     [editable, typeOrder, updateHour]
   );
 
+  const handleHover = useCallback(
+    (data: HourTooltipData | null, event: React.MouseEvent) => {
+      if (tooltipTimeoutRef.current) {
+        clearTimeout(tooltipTimeoutRef.current);
+      }
+
+      if (data) {
+        setTooltip({
+          data: {
+            ...data,
+            segment: daysData
+              .find((d) => d.date === data.date)
+              ?.segments.find(
+                (s) => data.hour >= s.startHour && data.hour < s.endHour
+              ),
+          },
+          position: { x: event.pageX, y: event.pageY },
+        });
+      } else {
+        tooltipTimeoutRef.current = window.setTimeout(() => {
+          setTooltip(null);
+        }, 100) as unknown as number;
+      }
+    },
+    [daysData]
+  );
+
+  useEffect(() => {
+    return () => {
+      if (tooltipTimeoutRef.current) {
+        clearTimeout(tooltipTimeoutRef.current);
+      }
+    };
+  }, []);
+
   return (
     <div className="day-boxing" style={{ padding: theme.gap * 2 }}>
       <DayBoxingGrid
@@ -77,23 +119,7 @@ export const DayBoxing: React.FC<DayBoxingProps> = ({
         onHourChange={handleHourClick}
         editable={editable}
         customTypes={customTypes}
-        onHover={(data, event) =>
-          setTooltip(
-            data
-              ? {
-                  data: {
-                    ...data,
-                    segment: daysData
-                      .find((d) => d.date === data.date)
-                      ?.segments.find(
-                        (s) => data.hour >= s.startHour && data.hour < s.endHour
-                      ),
-                  },
-                  position: { x: event.pageX, y: event.pageY },
-                }
-              : null
-          )
-        }
+        onHover={handleHover}
       />
       {tooltip && <Tooltip {...tooltip} theme={theme} />}
     </div>

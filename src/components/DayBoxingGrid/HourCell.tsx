@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef } from "react";
 import { HourData, HourType, ThemeConfig, HourChangeEvent } from "../../types";
 
 export interface HourCellProps {
@@ -37,6 +37,18 @@ export const HourCell: React.FC<HourCellProps> = ({
     return theme.colors[type as keyof typeof theme.colors] || theme.colors.base;
   };
 
+  const handleMouseEnter = (e: React.MouseEvent) => {
+    if (onHover) {
+      onHover({ hour: hour.hour, type: hour.type, date }, e);
+    }
+  };
+
+  const handleMouseLeave = (e: React.MouseEvent) => {
+    if (onHover) {
+      onHover(null, e);
+    }
+  };
+
   const handleClick = () => {
     if (!editable || !onChange) return;
     onChange({
@@ -53,6 +65,7 @@ export const HourCell: React.FC<HourCellProps> = ({
 
   return (
     <div
+      className="hour-cell"
       style={{
         width: theme.cellSize,
         height: theme.cellSize,
@@ -68,10 +81,8 @@ export const HourCell: React.FC<HourCellProps> = ({
         userSelect: "none",
       }}
       onClick={handleClick}
-      onMouseEnter={(e) =>
-        onHover?.({ hour: hour.hour, type: hour.type, date }, e)
-      }
-      onMouseLeave={(e) => onHover?.(null, e)}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
     >
       {hour.hour}
     </div>

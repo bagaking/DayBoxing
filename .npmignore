@@ -1,0 +1,38 @@
+src/
+example/
+tests/
+docs/
+
+# 配置文件
+.*rc
+.*ignore
+*.config.js
+*.config.ts
+tsconfig.json
+.*es
+
+# 环境文件
+*_env.sh
+.env*
+*.env
+
+# 编辑器配置
+.vscode/
+.idea/
+*.sublime*
+
+# 临时文件
+*.log
+*.tmp
+.DS_Store
+Thumbs.db
+
+# 开发依赖
+node_modules/
+coverage/
+.nyc_output/
+
+# 其他
+*.tgz
+*.zip
+*.tar.gz

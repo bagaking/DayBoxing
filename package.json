@@ -1,6 +1,11 @@
 {
   "name": "@bagaking/dayboxing",
   "version": "0.1.0",
+  "private": false,
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
   "description": "A React component library for DayBoxing time management visualization",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
@@ -10,7 +15,9 @@
   ],
   "scripts": {
     "build": "rollup -c",
-    "dev": "rollup -c -w"
+    "dev": "rollup -c -w",
+    "prepublishOnly": "npm run build",
+    "clean": "rm -rf dist"
   },
   "keywords": [
     "react",

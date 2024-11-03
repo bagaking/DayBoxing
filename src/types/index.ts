@@ -27,6 +27,7 @@ export interface DayData {
   date: string;
   hours: HourData[];
   segments: DaySegment[];
+  qhSegments?: QHAnalysis[];
 }
 
 // Theme configuration
@@ -46,34 +47,25 @@ export interface ThemeConfig {
 
 // DayBoxingProps
 export interface DayBoxingProps {
-  // Support single or multiple days data
-  data: DayData | DayData[];
-  // Layout direction
+  patterns: DayPattern[];
+  dates: string[];
   direction?: "horizontal" | "vertical";
-  // Theme configuration
   theme?: Partial<ThemeConfig>;
-  // Whether to show date label
   showDateLabel?: boolean;
-  // Custom rendering function for hour cells
   renderHour?: (hour: HourData, date: string) => React.ReactNode;
-  // Custom rendering function for date labels
   renderDateLabel?: (date: string) => React.ReactNode;
-  // Data modification callback
   onHourChange?: (event: HourChangeEvent) => void;
-  // Whether data can be modified
+  onPatternEdit?: (event: PatternEditEvent) => void;
   editable?: boolean;
-  // Shortcuts configuration
   shortcuts?: {
     [key: string]: HourType;
   };
-  // Custom types configuration
   customTypes?: {
     [key: string]: {
       color: string;
       label: string;
     };
   };
-  // Optional type loop order
   typeOrder?: HourType[];
 }
 
@@ -91,4 +83,67 @@ export interface HourChangeEvent {
   date: string;
   oldType: HourType;
   newType: HourType;
+}
+
+// 添加新的类型定义
+export interface DayBoxingGridProps {
+  data: DayData[];
+  direction: "horizontal" | "vertical";
+  theme: ThemeConfig;
+  showDateLabel: boolean;
+  renderDateLabel?: (date: string) => React.ReactNode;
+  renderHour?: (hour: HourData, date: string) => React.ReactNode;
+  onHourChange?: (event: HourChangeEvent) => void;
+  editable: boolean;
+  customTypes?: {
+    [key: string]: {
+      color: string;
+      label: string;
+    };
+  };
+  onHover?: (data: HourTooltipData | null, event: React.MouseEvent) => void;
+}
+
+export interface DayRowProps extends Omit<DayBoxingGridProps, "data"> {
+  day: DayData;
+}
+
+export interface TooltipProps {
+  data: HourTooltipData;
+  position: { x: number; y: number };
+  theme: ThemeConfig;
+}
+
+// 在已有的类型定义中添加
+export type QHSegment = "A" | "B" | "C" | "F";
+
+export interface QHAnalysis {
+  segment: QHSegment;
+  startHour: number;
+  endHour: number;
+  type: PartType;
+  mainType: HourType;
+  secondaryType?: HourType;
+}
+
+// 在已有的类型定义中添加
+export interface TimeBlock {
+  type: HourType;
+  duration: number; // 持续小时数
+}
+
+export interface DayPattern {
+  startHour: number; // 可以是负数，表示从前一天开始
+  blocks: TimeBlock[]; // 时间块定义
+}
+
+// 添加编辑操作的事件类型
+export interface PatternEditEvent {
+  date: string;
+  type: "moveStart" | "addBlock" | "removeBlock" | "updateBlock";
+  payload: {
+    startHour?: number;
+    blockIndex?: number;
+    block?: TimeBlock;
+  };
 }

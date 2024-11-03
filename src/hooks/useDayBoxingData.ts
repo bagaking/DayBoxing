@@ -1,17 +1,35 @@
 import { useState, useCallback } from "react";
-import { DayData, HourType, HourChangeEvent } from "../types";
+import { DayData, HourType, HourChangeEvent, DayPattern } from "../types";
+import { analyzeQHSegments } from "../utils/qhAnalysis";
+import { createHoursFromPattern } from "../utils/dayPatternUtils";
 
 export interface UseDayBoxingDataProps {
-  initialData: DayData | DayData[];
+  patterns: DayPattern[];
+  dates: string[];
   onChange?: (event: HourChangeEvent) => void;
 }
 
+const createDayData = (pattern: DayPattern, date: string): DayData => {
+  const hours = createHoursFromPattern(pattern);
+  const dayData: DayData = {
+    date,
+    hours,
+    segments: [], // 暂时为空，后面会通过 QH 分析生成
+  };
+
+  return {
+    ...dayData,
+    qhSegments: analyzeQHSegments(dayData),
+  };
+};
+
 export const useDayBoxingData = ({
-  initialData,
+  patterns,
+  dates,
   onChange,
 }: UseDayBoxingDataProps) => {
   const [data, setData] = useState<DayData[]>(
-    Array.isArray(initialData) ? initialData : [initialData]
+    patterns.map((pattern, index) => createDayData(pattern, dates[index]))
   );
 
   const updateHour = useCallback(
@@ -35,9 +53,15 @@ export const useDayBoxingData = ({
             newType,
           });
 
-          return {
+          const updatedDay = {
             ...day,
             hours: newHours,
+          };
+
+          // 重新计算 QH 分段
+          return {
+            ...updatedDay,
+            qhSegments: analyzeQHSegments(updatedDay),
           };
         });
       });

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { QHAnalysis, ThemeConfig } from "../../types";
 
 interface QHSegmentsProps {
@@ -6,14 +6,38 @@ interface QHSegmentsProps {
   theme: ThemeConfig;
 }
 
+// 获取段落类型标识
+const getPartTypeSymbol = (seg: QHAnalysis) => {
+  const segment = seg.segment;
+  const type = !seg.secondaryType
+    ? "Fu"
+    : seg.type === "balance"
+    ? "Ba"
+    : seg.type === "chaos"
+    ? "Ch"
+    : "Mi";
+  return `${segment}${type}`;
+};
+
+// 获取段落类型说明
+const getPartTypeDescription = (seg: QHAnalysis) => {
+  if (!seg.secondaryType) return `${seg.mainType} Full Part`;
+  if (seg.type === "balance")
+    return `${seg.mainType}-${seg.secondaryType} Balance Part`;
+  if (seg.type === "chaos") return "Chaos Part";
+  return `${seg.mainType}-${seg.secondaryType} Mix Part`;
+};
+
 export const QHSegments: React.FC<QHSegmentsProps> = ({ segments, theme }) => {
+  const [hoveredSegment, setHoveredSegment] = useState<string | null>(null);
+
   return (
     <div
       style={{
         display: "flex",
         flexDirection: "column",
         gap: theme.gap,
-        width: "260px",
+        width: "150px",
       }}
     >
       {segments.map((seg) => (
@@ -23,119 +47,123 @@ export const QHSegments: React.FC<QHSegmentsProps> = ({ segments, theme }) => {
             height: theme.cellSize,
             display: "flex",
             alignItems: "center",
-            gap: "8px",
-            padding: "0 12px",
+            gap: "6px",
+            padding: "0 8px",
             backgroundColor: "rgba(255, 255, 255, 0.98)",
             borderRadius: theme.borderRadius,
-            border: `1px solid ${
-              theme.colors[seg.mainType as keyof typeof theme.colors] ||
-              theme.colors.base
-            }`,
-            boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
+            boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
             position: "relative",
-            overflow: "hidden",
           }}
+          onMouseEnter={() => setHoveredSegment(seg.segment)}
+          onMouseLeave={() => setHoveredSegment(null)}
         >
-          {/* 背景指示器 */}
+          {/* 左侧色块和标识 */}
           <div
             style={{
-              position: "absolute",
-              left: 0,
-              top: 0,
-              bottom: 0,
-              width: "3px",
-              backgroundColor:
-                theme.colors[seg.mainType as keyof typeof theme.colors],
-              opacity: 0.8,
-            }}
-          />
-
-          {/* 段落标识 */}
-          <div
-            style={{
-              fontWeight: 600,
-              fontSize: "13px",
-              color: theme.colors[seg.mainType as keyof typeof theme.colors],
-              width: "16px",
-              flexShrink: 0,
-            }}
-          >
-            {seg.segment}
-          </div>
-
-          {/* 类型信息 - 改为上下布局 */}
-          <div
-            style={{
+              width: "48px",
+              height: "24px",
+              borderRadius: "4px",
+              backgroundColor: `${
+                theme.colors[seg.mainType as keyof typeof theme.colors]
+              }15`,
               display: "flex",
-              flexDirection: "column",
+              alignItems: "center",
               justifyContent: "center",
+              flexShrink: 0,
+              position: "relative",
               gap: "2px",
-              flex: 1,
-              minWidth: 0,
-              height: "100%",
             }}
           >
-            {/* 上行：类型信息 */}
-            <div
+            {/* 段落标识 */}
+            <span
               style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "4px",
                 fontSize: "11px",
-                lineHeight: "11px",
-                color: "rgba(0,0,0,0.7)",
+                fontWeight: 500,
+                color: theme.colors[seg.mainType as keyof typeof theme.colors],
+                opacity: 0.8,
+                padding: "0 2px",
+                borderRadius: "2px",
               }}
             >
-              <span
-                style={{
-                  padding: "1px 4px",
-                  backgroundColor: "rgba(0,0,0,0.04)",
-                  borderRadius: "2px",
-                  fontSize: "10px",
-                  fontWeight: 500,
-                }}
-              >
-                {seg.type}
-              </span>
-              <div
-                style={{ display: "flex", alignItems: "center", gap: "4px" }}
-              >
-                <span
-                  style={{
-                    width: "4px",
-                    height: "4px",
-                    borderRadius: "50%",
-                    backgroundColor:
-                      theme.colors[seg.mainType as keyof typeof theme.colors],
-                  }}
-                />
-                {seg.mainType}
-                {seg.secondaryType && (
-                  <>
-                    <span style={{ opacity: 0.5, margin: "0 -1px" }}>-</span>
-                    <span
-                      style={{
-                        width: "4px",
-                        height: "4px",
-                        borderRadius: "50%",
-                        backgroundColor:
-                          theme.colors[
-                            seg.secondaryType as keyof typeof theme.colors
-                          ],
-                      }}
-                    />
-                    {seg.secondaryType}
-                  </>
-                )}
-              </div>
-            </div>
+              {seg.segment}
+            </span>
+            {/* 类型标识 */}
+            <span
+              style={{
+                fontSize: "10px",
+                fontWeight: 600,
+                color: theme.colors[seg.mainType as keyof typeof theme.colors],
+                opacity: 0.6,
+                padding: "0 2px",
+                borderRadius: "2px",
+              }}
+            >
+              {!seg.secondaryType
+                ? "Fu"
+                : seg.type === "balance"
+                ? "Ba"
+                : seg.type === "chaos"
+                ? "Ch"
+                : "Mi"}
+            </span>
+          </div>
 
-            {/* 下行：时间范围 */}
+          {/* Tooltip */}
+          {hoveredSegment === seg.segment && (
+            <div
+              style={{
+                position: "absolute",
+                left: "100%",
+                top: "50%",
+                transform: "translateY(-50%)",
+                marginLeft: "8px",
+                padding: "6px 10px",
+                backgroundColor: "rgba(0,0,0,0.8)",
+                color: "#fff",
+                borderRadius: "4px",
+                fontSize: "12px",
+                whiteSpace: "nowrap",
+                zIndex: 1000,
+              }}
+            >
+              {getPartTypeDescription(seg)}
+            </div>
+          )}
+
+          {/* 右侧信息 */}
+          <div style={{ flex: 1, minWidth: 0 }}>
             <div
               style={{
                 fontSize: "10px",
-                lineHeight: "10px",
-                color: "rgba(0,0,0,0.5)",
+                display: "flex",
+                alignItems: "center",
+                gap: "3px",
+                marginBottom: "1px",
+                color: theme.colors[seg.mainType as keyof typeof theme.colors],
+              }}
+            >
+              {seg.mainType}
+              {seg.secondaryType && (
+                <>
+                  <span style={{ opacity: 0.3 }}>/</span>
+                  <span
+                    style={{
+                      color:
+                        theme.colors[
+                          seg.secondaryType as keyof typeof theme.colors
+                        ],
+                    }}
+                  >
+                    {seg.secondaryType}
+                  </span>
+                </>
+              )}
+            </div>
+
+            <div
+              style={{
+                fontSize: "9px",
+                color: "rgba(0,0,0,0.45)",
                 fontFamily: "monospace",
               }}
             >

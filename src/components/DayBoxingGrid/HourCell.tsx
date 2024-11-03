@@ -39,16 +39,11 @@ export const HourCell: React.FC<HourCellProps> = ({
 
   const handleClick = () => {
     if (!editable || !onChange) return;
-
-    const types: HourType[] = ["sleep", "work", "base", "relax"];
-    const currentIndex = types.indexOf(hour.type as HourType);
-    const nextType = types[(currentIndex + 1) % types.length];
-
     onChange({
       hour: hour.hour,
       date,
       oldType: hour.type,
-      newType: nextType,
+      newType: hour.type,
     });
   };
 

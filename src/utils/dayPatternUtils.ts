@@ -32,8 +32,8 @@ export const editPattern = (
       return {
         ...pattern,
         blocks: pattern.blocks.map((block, i) =>
-          i === payload.blockIndex ? payload.block : block
-        ),
+          i === payload.blockIndex && payload.block ? payload.block : block
+        ) as TimeBlock[],
       };
     default:
       return pattern;

@@ -2,19 +2,15 @@
   "name": "@bagaking/dayboxing",
   "version": "0.1.0",
   "description": "A React component library for DayBoxing time management visualization",
-  "main": "dist/cjs/index.js",
-  "module": "dist/esm/index.js",
+  "main": "dist/index.js",
+  "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",
   "files": [
     "dist"
   ],
   "scripts": {
     "build": "rollup -c",
-    "test": "jest",
-    "lint": "eslint src --ext .ts,.tsx",
-    "prepare": "pnpm run build",
-    "dev": "pnpm --filter example dev",
-    "build:example": "pnpm --filter example build"
+    "dev": "rollup -c -w"
   },
   "keywords": [
     "react",

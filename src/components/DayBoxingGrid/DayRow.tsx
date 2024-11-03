@@ -1,7 +1,7 @@
 import React from "react";
 import { HourCell } from "./HourCell";
 import { QHSegments } from "./QHSegments";
-import { DayRowProps } from "../../types";
+import { DayRowProps, HourData } from "../../types";
 
 export const DayRow: React.FC<DayRowProps> = ({
   day,
@@ -34,10 +34,27 @@ export const DayRow: React.FC<DayRowProps> = ({
         alignItems: "flex-start",
         gap: theme.gap * 2,
         marginBottom: theme.gap * 4,
+        position: "relative",
       }}
     >
+      {day.qhSegments && (
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: theme.gap,
+            paddingTop: showDateLabel ? "24px" : 0,
+          }}
+        >
+          <QHSegments segments={day.qhSegments} theme={theme} />
+        </div>
+      )}
       <div
-        style={{ display: "flex", flexDirection: "column", gap: theme.gap * 2 }}
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          minHeight: hourRows.length * (theme.cellSize + theme.gap) - theme.gap,
+        }}
       >
         {showDateLabel && (
           <div
@@ -46,6 +63,7 @@ export const DayRow: React.FC<DayRowProps> = ({
               minWidth: 100,
               fontSize: "14px",
               fontWeight: 500,
+              marginBottom: theme.gap * 2,
             }}
           >
             {renderDateLabel ? renderDateLabel(day.date) : day.date}
@@ -53,7 +71,12 @@ export const DayRow: React.FC<DayRowProps> = ({
         )}
         <div
           className="hours-rows"
-          style={{ display: "flex", flexDirection: "column", gap: theme.gap }}
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: theme.gap,
+            flex: 1,
+          }}
         >
           {hourRows.map((row, rowIndex) => (
             <div
@@ -62,6 +85,7 @@ export const DayRow: React.FC<DayRowProps> = ({
               style={{
                 display: "flex",
                 gap: theme.gap,
+                height: theme.cellSize,
               }}
             >
               {row.map((hour) => (
@@ -81,16 +105,6 @@ export const DayRow: React.FC<DayRowProps> = ({
           ))}
         </div>
       </div>
-      {day.qhSegments && (
-        <div
-          style={{
-            marginLeft: theme.gap * 2,
-            paddingTop: "24px", // 与日期标签对齐
-          }}
-        >
-          <QHSegments segments={day.qhSegments} theme={theme} />
-        </div>
-      )}
     </div>
   );
 };

@@ -8,14 +8,20 @@ export default {
   input: 'src/index.ts',
   output: [
     {
-      file: 'dist/cjs/index.js',
+      dir: 'dist',
       format: 'cjs',
-      sourcemap: true
+      entryFileNames: '[name].cjs.js',
+      sourcemap: true,
+      preserveModules: true,
+      preserveModulesRoot: 'src'
     },
     {
-      file: 'dist/esm/index.js',
+      dir: 'dist',
       format: 'esm',
-      sourcemap: true
+      entryFileNames: '[name].esm.js',
+      sourcemap: true,
+      preserveModules: true,
+      preserveModulesRoot: 'src'
     }
   ],
   plugins: [
@@ -24,7 +30,8 @@ export default {
     commonjs(),
     typescript({
       tsconfig: './tsconfig.json',
-      exclude: ['**/*.test.ts', '**/*.test.tsx']
+      declaration: true,
+      declarationDir: 'dist/types'
     }),
     terser()
   ],

@@ -14,6 +14,7 @@ export interface DaySegment {
   secondaryType?: HourType;
   startHour: number;
   endHour: number;
+  distribution?: Record<string, number>;
 }
 
 // Hour data

@@ -1,0 +1,45 @@
+{
+  "name": "@bagaking/dayboxing",
+  "version": "0.1.0",
+  "description": "A React component library for DayBoxing time management visualization",
+  "main": "dist/cjs/index.js",
+  "module": "dist/esm/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "rollup -c",
+    "test": "jest",
+    "lint": "eslint src --ext .ts,.tsx",
+    "prepare": "pnpm run build",
+    "dev": "pnpm --filter example dev",
+    "build:example": "pnpm --filter example build"
+  },
+  "keywords": [
+    "react",
+    "typescript",
+    "dayboxing",
+    "time-management",
+    "visualization"
+  ],
+  "author": "bagaking",
+  "license": "MIT",
+  "peerDependencies": {
+    "react": ">=16.8.0",
+    "react-dom": ">=16.8.0"
+  },
+  "devDependencies": {
+    "@emotion/react": "^11.11.3",
+    "@emotion/styled": "^11.11.0",
+    "@rollup/plugin-commonjs": "^25.0.7",
+    "@rollup/plugin-node-resolve": "^15.2.3",
+    "@rollup/plugin-typescript": "^11.1.6",
+    "@types/react": "^18.2.48",
+    "@types/react-dom": "^18.2.18",
+    "rollup": "^4.9.6",
+    "rollup-plugin-peer-deps-external": "^2.2.4",
+    "rollup-plugin-terser": "^7.0.2",
+    "typescript": "^5.3.3"
+  }
+}

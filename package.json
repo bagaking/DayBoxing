@@ -9,12 +9,13 @@
   "description": "A React component library for DayBoxing time management visualization",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
-  "types": "dist/index.d.ts",
+  "types": "index.d.ts",
   "files": [
-    "dist"
+    "dist",
+    "index.d.ts"
   ],
   "scripts": {
-    "build": "rollup -c",
+    "build": "rollup -c && tsc --emitDeclarationOnly",
     "dev": "rollup -c -w",
     "prepublishOnly": "npm run build",
     "clean": "rm -rf dist"

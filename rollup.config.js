@@ -31,7 +31,8 @@ export default {
     typescript({
       tsconfig: './tsconfig.json',
       declaration: true,
-      declarationDir: 'dist/types'
+      declarationDir: 'dist/types',
+      exclude: ['example/**/*']
     }),
     terser()
   ],

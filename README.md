@@ -38,7 +38,7 @@ function App() {
     <DayBoxing 
       patterns={[
         // 每个字符串代表一个小时的时间类型
-        ["sleep", "sleep", "sleep", "work", "work", "base", "relax"]
+        ["sleep", "sleep", "sleep", "work", "work", "life", "relax"]
       ]}
       dates={["2024-03-15"]}
     />
@@ -56,7 +56,7 @@ const pattern = {
   blocks: [
     { type: "sleep", duration: 8, comment: "Night sleep" }, 
     { type: "work", duration: 4, comment: "Morning focus" },
-    { type: "base", duration: 1, comment: "Lunch break" },
+    { type: "life", duration: 1, comment: "Lunch break" },
     { type: "work", duration: 4, comment: "Afternoon work" },
     { type: "relax", duration: 4, comment: "Evening activities" }
   ]
@@ -82,7 +82,7 @@ const pattern = {
     "sleep", "sleep", "sleep", "sleep", "sleep", "sleep",
     { type: "sleep", duration: 2, comment: "Dream" }, 
     { type: "work", duration: 4, comment: "Morning focus" },
-    { type: "base", duration: 1, comment: "Lunch break" },
+    { type: "life", duration: 1, comment: "Lunch break" },
     { type: "work", duration: 4, comment: "Afternoon work" },
     { type: "relax", duration: 4, comment: "Evening activities" }
   ]
@@ -97,7 +97,7 @@ const theme = {
   colors: {
     sleep: "#A78BFA",
     work: "#60A5FA",
-    base: "#34D399",
+    life: "#34D399",
     relax: "#FBBF24",
     background: "#ffffff",
     text: "#1f2937",
@@ -116,7 +116,7 @@ const theme = {
 const shortcuts = {
   s: "sleep",
   w: "work",
-  b: "base",
+  l: "life",
   r: "relax"
 };
 
@@ -206,7 +206,7 @@ interface DayPattern {
   }>;
 }
 
-type HourType = "sleep" | "work" | "base" | "relax";
+type HourType = "sleep" | "work" | "life" | "relax";
 
 interface HourChangeEvent {
   hour: number;
@@ -269,7 +269,7 @@ const pattern = {
   blocks: [
     { type: "sleep", duration: 8 },  // A段: S(fp)
     { type: "work", duration: 6 },   // B段: W-B(mp)
-    { type: "base", duration: 1 },
+    { type: "life", duration: 1 },
     { type: "work", duration: 4 },   // C段: W-R(bp)
     { type: "relax", duration: 3, comment: "Evening activities" },
     { type: "relax", duration: 2 }   // F段: R(fp)

@@ -1,5 +1,5 @@
 // Hour types
-export type BaseHourType = "sleep" | "work" | "base" | "relax";
+export type BaseHourType = "sleep" | "work" | "life" | "relax";
 
 // Support custom types
 export type HourType = BaseHourType | string;
@@ -37,7 +37,7 @@ export interface ThemeConfig {
   colors: {
     sleep: string;
     work: string;
-    base: string;
+    life: string;
     relax: string;
     background: string;
     text: string;
@@ -128,6 +128,9 @@ export interface QHAnalysis {
   type: PartType;
   mainType: HourType;
   secondaryType?: HourType;
+  mainTypeHours: number; // 主要类型的小时数
+  secondaryTypeHours?: number; // 次要类型的小时数
+  distribution?: Record<string, number>;
 }
 
 // 在已有的类型定义中添加

@@ -65,7 +65,7 @@ export const DayBoxing: React.FC<DayBoxingProps> = ({
   const handleHourClick = useCallback(
     (event: HourChangeEvent) => {
       if (!editable) return;
-      const types = typeOrder || ["sleep", "work", "base", "relax"];
+      const types = typeOrder || ["sleep", "work", "life", "relax"];
       const currentIndex = types.indexOf(event.oldType);
       const nextType = types[(currentIndex + 1) % types.length];
       updateHour(event.date, event.hour, nextType);

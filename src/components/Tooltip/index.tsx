@@ -79,54 +79,86 @@ const useTooltipPosition = (
   containerRef: React.RefObject<HTMLDivElement>
 ) => {
   const [position, setPosition] = useState(initialPosition);
-  const [offset, setOffset] = useState({ x: 15, y: 15 });
 
   useEffect(() => {
     const tooltip = tooltipRef.current;
     const container = containerRef.current;
     if (!tooltip || !container) return;
 
+    const MARGIN = 12;
+    const MOUSE_BUFFER = 16; // 减小鼠标和 tooltip 之间的距离
+
     const tooltipRect = tooltip.getBoundingClientRect();
     const containerRect = container.getBoundingClientRect();
+    const viewportHeight = window.innerHeight;
+    const viewportWidth = window.innerWidth;
 
-    const MARGIN = 20;
-    let x = initialPosition.x + offset.x;
-    let y = initialPosition.y + offset.y;
+    // 计算可用空间
+    const spaceAbove = initialPosition.y - containerRect.top;
+    const spaceBelow = containerRect.bottom - initialPosition.y;
+    const spaceLeft = initialPosition.x - containerRect.left;
+    const spaceRight = containerRect.right - initialPosition.x;
 
-    // 计算相对于容器的位置
-    const relativeX = x - containerRect.left;
-    const relativeY = y - containerRect.top;
+    let x = initialPosition.x;
+    let y = initialPosition.y;
 
-    // 水平方向调整
-    if (relativeX + tooltipRect.width > containerRect.width - MARGIN) {
-      x = containerRect.right - tooltipRect.width - MARGIN;
-    }
-    if (relativeX < MARGIN) {
-      x = containerRect.left + MARGIN;
+    // 优化水平位置计算
+    if (spaceRight >= tooltipRect.width + MARGIN) {
+      // 优先显示在鼠标右侧，但不要太远
+      x = initialPosition.x + MOUSE_BUFFER;
+    } else if (spaceLeft >= tooltipRect.width + MARGIN) {
+      // 其次显示在鼠标左侧，但要保持适当距离
+      x = initialPosition.x - tooltipRect.width - MOUSE_BUFFER;
+    } else {
+      // 如果左右都放不下，则水平居中显示
+      x = Math.max(
+        containerRect.left + MARGIN,
+        Math.min(
+          initialPosition.x - tooltipRect.width / 2,
+          containerRect.right - tooltipRect.width - MARGIN
+        )
+      );
     }
 
-    // 垂直方向调整
-    if (relativeY + tooltipRect.height > containerRect.height - MARGIN) {
-      y = containerRect.bottom - tooltipRect.height - MARGIN;
+    // 优化垂直位置计算
+    if (spaceBelow >= tooltipRect.height + MARGIN) {
+      // 优先显示在鼠标下方，但不要太远
+      y = initialPosition.y + MOUSE_BUFFER;
+    } else if (spaceAbove >= tooltipRect.height + MARGIN) {
+      // 其次显示在鼠标上方，保持适当距离
+      y = initialPosition.y - tooltipRect.height - MOUSE_BUFFER;
+    } else {
+      // 如果上下都放不下，则垂直居中显示
+      y = Math.max(
+        containerRect.top + MARGIN,
+        Math.min(
+          initialPosition.y - tooltipRect.height / 2,
+          containerRect.bottom - tooltipRect.height - MARGIN
+        )
+      );
     }
-    if (relativeY < MARGIN) {
-      y = containerRect.top + MARGIN;
-    }
+
+    // 确保不超出视口和容器边界
+    x = Math.max(
+      containerRect.left + MARGIN,
+      Math.min(x, containerRect.right - tooltipRect.width - MARGIN)
+    );
+    y = Math.max(
+      containerRect.top + MARGIN,
+      Math.min(y, containerRect.bottom - tooltipRect.height - MARGIN)
+    );
 
     setPosition({ x, y });
-  }, [initialPosition, offset]);
+  }, [initialPosition, tooltipRef, containerRef]);
 
-  return {
-    position,
-    setOffset,
-  };
+  return position;
 };
 
 export const Tooltip: React.FC<
   TooltipProps & { containerRef: React.RefObject<HTMLDivElement> }
 > = ({ data, position: initialPosition, theme, containerRef }) => {
   const tooltipRef = useRef<HTMLDivElement>(null);
-  const { position, setOffset } = useTooltipPosition(
+  const position = useTooltipPosition(
     initialPosition,
     tooltipRef,
     containerRef
@@ -162,17 +194,10 @@ export const Tooltip: React.FC<
           setTooltipData(data);
         }
 
-        requestAnimationFrame(() => {
-          requestAnimationFrame(() => {
-            setOffset({ x: 15, y: 15 });
-          });
-        });
-
         timeoutRef.current = window.setTimeout(() => {
           setIsTransitioning(false);
         }, 300);
       } else {
-        setOffset({ x: 15, y: 15 });
         setTooltipData(data);
       }
 
@@ -203,7 +228,7 @@ export const Tooltip: React.FC<
   if (!isVisible || !tooltipData) return null;
 
   const getSegmentColor = (type: string) => {
-    return theme.colors[type as keyof typeof theme.colors] || theme.colors.base;
+    return theme.colors[type as keyof typeof theme.colors] || theme.colors.life;
   };
 
   const formatHour = (hour: number) => {
@@ -226,6 +251,7 @@ export const Tooltip: React.FC<
       style={{
         left: position.x,
         top: position.y,
+        pointerEvents: "none", // 防止 tooltip 本身影响鼠标事件
       }}
     >
       <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
@@ -382,7 +408,7 @@ export const Tooltip: React.FC<
           }}
         >
           <span>Press</span>
-          {["S", "W", "B", "R"].map((key) => (
+          {["S", "W", "L", "R"].map((key) => (
             <span
               key={key}
               style={{

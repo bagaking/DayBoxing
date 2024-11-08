@@ -17,27 +17,17 @@ const countTypes = (hours: HourData[]): Record<string, number> => {
 };
 
 /**
- * Normalize hour to handle negative and overflow hours
- * @param hour - Raw hour number
- * @returns Normalized hour in 0-23 range
+ * Check if the day is long or short
+ * Long day: > 24h (up to 28h)
+ * Short day: < 24h (min 21h)
  */
-const normalizeHour = (hour: number): number => {
-  if (hour < 0) return hour + 24;
-  if (hour >= 24) return hour - 24;
-  return hour;
-};
+const getDayType = (hours: HourData[]): "long" | "short" | "normal" => {
+  if (!hours.length) return "normal";
+  const totalHours = hours[hours.length - 1].hour - hours[0].hour + 1;
 
-/**
- * Calculate segment length considering day boundaries
- * @param startHour - Segment start hour
- * @param endHour - Segment end hour
- * @returns Actual segment length
- */
-const calculateSegmentLength = (startHour: number, endHour: number): number => {
-  if (endHour < startHour) {
-    endHour += 24;
-  }
-  return endHour - startHour;
+  if (totalHours > 24) return totalHours <= 28 ? "long" : "normal";
+  if (totalHours < 24) return totalHours >= 21 ? "short" : "normal";
+  return "normal";
 };
 
 /**
@@ -55,6 +45,8 @@ const determinePartType = (
   type: PartType;
   mainType: HourType;
   secondaryType?: HourType;
+  mainTypeHours: number;
+  secondaryTypeHours?: number;
   distribution?: Record<string, number>;
 } => {
   const total = Object.values(typeCounts).reduce((a, b) => a + b, 0);
@@ -64,6 +56,7 @@ const determinePartType = (
     return {
       type: "full",
       mainType: "undefined",
+      mainTypeHours: 0,
       distribution: {},
     };
   }
@@ -83,25 +76,34 @@ const determinePartType = (
   }, {} as Record<string, number>);
 
   if (sortedTypes.length === 0) {
-    return { type: "full", mainType: "undefined", distribution };
-  }
-
-  if (sortedTypes.length === 1 || sortedTypes[0].ratio > 0.8) {
     return {
       type: "full",
-      mainType: sortedTypes[0].type,
+      mainType: "undefined",
+      mainTypeHours: 0,
       distribution,
     };
   }
 
   const [main, secondary] = sortedTypes;
 
+  // Full Part: Single type dominates
+  if (sortedTypes.length === 1 || main.ratio > 0.8) {
+    return {
+      type: "full",
+      mainType: main.type as HourType,
+      mainTypeHours: main.count,
+      distribution,
+    };
+  }
+
   // Balance Part: Two major types with similar proportions
   if (main.ratio >= 0.35 && secondary.ratio >= 0.35) {
     return {
       type: "balance",
-      mainType: main.type,
-      secondaryType: secondary.type,
+      mainType: main.type as HourType,
+      secondaryType: secondary.type as HourType,
+      mainTypeHours: main.count,
+      secondaryTypeHours: secondary.count,
       distribution,
     };
   }
@@ -110,8 +112,10 @@ const determinePartType = (
   if (main.ratio >= 0.6 && secondary.count >= 2) {
     return {
       type: "mix",
-      mainType: main.type,
-      secondaryType: secondary.type,
+      mainType: main.type as HourType,
+      secondaryType: secondary.type as HourType,
+      mainTypeHours: main.count,
+      secondaryTypeHours: secondary.count,
       distribution,
     };
   }
@@ -123,8 +127,10 @@ const determinePartType = (
   ) {
     return {
       type: "chaos",
-      mainType: main.type,
-      secondaryType: secondary.type,
+      mainType: main.type as HourType,
+      secondaryType: secondary.type as HourType,
+      mainTypeHours: main.count,
+      secondaryTypeHours: secondary.count,
       distribution,
     };
   }
@@ -132,14 +138,18 @@ const determinePartType = (
   // Default to Mix Part
   return {
     type: "mix",
-    mainType: main.type,
-    ...(secondary?.count >= 2 ? { secondaryType: secondary.type } : {}),
+    mainType: main.type as HourType,
+    ...(secondary?.count >= 2
+      ? { secondaryType: secondary.type as HourType }
+      : {}),
+    mainTypeHours: main.count,
+    ...(secondary?.count >= 2 ? { secondaryTypeHours: secondary.count } : {}),
     distribution,
   };
 };
 
 /**
- * Calculate F segment details based on day pattern
+ * Calculate F segment details
  *
  * Rules:
  * 1. F segment starts after C segment (startHour + 21)
@@ -153,42 +163,56 @@ const determinePartType = (
  */
 const calculateFSegment = (
   hours: HourData[],
-  startHour: number
+  startHour: number,
+  dayType: "long" | "short" | "normal"
 ): QHAnalysis => {
   const fSegmentStart = startHour + 21;
   const lastHour = hours[hours.length - 1]?.hour;
 
-  // Default F segment for empty or invalid cases
+  // Validate F segment length based on day type
+  const maxFSegmentLength = dayType === "long" ? 7 : 3; // 长日最多7h，普通日最多3h
+
+  // Default F segment
   const defaultFSegment: QHAnalysis = {
     segment: "F",
     startHour: fSegmentStart,
     endHour: fSegmentStart,
     type: "full",
     mainType: "undefined",
+    mainTypeHours: 0,
+    distribution: {},
   };
 
-  // If no hours data or last hour is before F segment
   if (!hours.length || lastHour < fSegmentStart) {
     return defaultFSegment;
   }
 
-  // Calculate F segment hours
-  const fSegmentHours = hours.filter((h) => h.hour >= fSegmentStart);
+  // Calculate F segment hours with length constraint
+  const fSegmentHours = hours.filter(
+    (h) => h.hour >= fSegmentStart && h.hour < fSegmentStart + maxFSegmentLength
+  );
 
-  // If F segment has hours, analyze them
   if (fSegmentHours.length > 0) {
-    const fSegmentEndHour = fSegmentHours[fSegmentHours.length - 1].hour;
     const analysis = determinePartType(countTypes(fSegmentHours));
+    const fSegmentEndHour = Math.min(
+      fSegmentHours[fSegmentHours.length - 1].hour + 1,
+      fSegmentStart + maxFSegmentLength
+    );
 
     return {
       segment: "F",
       startHour: fSegmentStart,
-      endHour: fSegmentEndHour + 1,
+      endHour: fSegmentEndHour,
       type: analysis.type,
       mainType: analysis.mainType,
+      mainTypeHours: analysis.mainTypeHours,
       ...(analysis.secondaryType
-        ? { secondaryType: analysis.secondaryType }
+        ? {
+            secondaryType: analysis.secondaryType,
+            secondaryTypeHours: analysis.secondaryTypeHours,
+          }
         : {}),
+      distribution: analysis.distribution,
     };
   }
 
@@ -211,6 +235,7 @@ export const analyzeQHSegments = (day: DayData): QHAnalysis[] => {
   if (!day.hours.length) return [];
 
   const startHour = day.hours[0].hour;
+  const dayType = getDayType(day.hours);
 
   // Calculate A, B, C segments
   const mainSegments = [
@@ -228,12 +253,21 @@ export const analyzeQHSegments = (day: DayData): QHAnalysis[] => {
 
     return {
       ...seg,
-      ...analysis,
+      type: analysis.type,
+      mainType: analysis.mainType,
+      mainTypeHours: analysis.mainTypeHours,
+      ...(analysis.secondaryType
+        ? {
+            secondaryType: analysis.secondaryType,
+            secondaryTypeHours: analysis.secondaryTypeHours,
+          }
+        : {}),
+      distribution: analysis.distribution,
     };
   });
 
   // Add F segment
-  const fSegment = calculateFSegment(day.hours, startHour);
+  const fSegment = calculateFSegment(day.hours, startHour, dayType);
 
   return [...analyzedSegments, fSegment];
 };

@@ -39,7 +39,7 @@ export const HourCell: React.FC<HourCellProps> = ({
     if (customTypes && type in customTypes) {
       return customTypes[type].color;
     }
-    return theme.colors[type as keyof typeof theme.colors] || theme.colors.base;
+    return theme.colors[type as keyof typeof theme.colors] || theme.colors.life;
   };
 
   const handleMouseEnter = (e: React.MouseEvent) => {

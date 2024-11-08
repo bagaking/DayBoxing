@@ -27,12 +27,30 @@ export default {
   ],
   plugins: [
     peerDepsExternal(),
-    resolve(),
-    commonjs(),
+    resolve({
+      preferBuiltins: true,
+      resolveOnly: [/^(?!babel-plugin-styled-components)/]
+    }),
+    commonjs({
+      include: /node_modules/
+    }),
     babel({
       babelHelpers: 'bundled',
-      presets: ['@babel/preset-react', '@babel/preset-typescript'],
-      plugins: ['babel-plugin-styled-components'],
+      presets: [
+        '@babel/preset-env',
+        '@babel/preset-react',
+        '@babel/preset-typescript'
+      ],
+      plugins: [
+        [
+          'babel-plugin-styled-components',
+          {
+            ssr: false,
+            displayName: true,
+            fileName: false
+          }
+        ]
+      ],
       extensions: ['.js', '.jsx', '.ts', '.tsx'],
       exclude: 'node_modules/**'
     }),

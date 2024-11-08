@@ -1,6 +1,6 @@
 {
   "name": "@bagaking/dayboxing",
-  "version": "0.1.2",
+  "version": "0.1.7",
   "private": false,
   "publishConfig": {
     "access": "public",
@@ -15,7 +15,7 @@
     "index.d.ts"
   ],
   "scripts": {
-    "build": "rollup -c && tsc --emitDeclarationOnly",
+    "build": "npm run clean && rollup -c && tsc --emitDeclarationOnly",
     "dev": "rollup -c -w",
     "prepublishOnly": "npm run build",
     "clean": "rm -rf dist"
@@ -29,14 +29,23 @@
   ],
   "author": "bagaking",
   "license": "MIT",
+  "dependencies": {
+    "styled-components": "^6.1.0",
+    "babel-plugin-styled-components": "^2.1.4"
+  },
   "peerDependencies": {
     "react": ">=16.8.0",
     "react-dom": ">=16.8.0",
-    "styled-components": ">=6.1.0"
+    "styled-components": ">=5.0.0"
   },
   "devDependencies": {
+    "@babel/core": "^7.26.0",
+    "@babel/preset-env": "^7.26.0",
+    "@babel/preset-react": "^7.23.3",
+    "@babel/preset-typescript": "^7.23.3",
     "@emotion/react": "^11.11.3",
     "@emotion/styled": "^11.11.0",
+    "@rollup/plugin-babel": "^6.0.4",
     "@rollup/plugin-commonjs": "^25.0.7",
     "@rollup/plugin-node-resolve": "^15.2.3",
     "@rollup/plugin-typescript": "^11.1.6",
@@ -45,10 +54,6 @@
     "rollup": "^4.9.6",
     "rollup-plugin-peer-deps-external": "^2.2.4",
     "rollup-plugin-terser": "^7.0.2",
-    "typescript": "^5.3.3",
-    "babel-plugin-styled-components": "^2.1.4",
-    "@babel/core": "^7.23.7",
-    "@babel/preset-react": "^7.23.3",
-    "@babel/preset-typescript": "^7.23.3"
+    "typescript": "^5.3.3"
   }
 }

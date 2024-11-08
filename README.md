@@ -277,7 +277,6 @@ const pattern = {
 };
 ```
 
-
 ## License
 
-MIT © [bagaking](LICENSE)
+MIT © [bagaking](./LICENSE)

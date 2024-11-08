@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
-import { TooltipProps } from "../../types";
+import { TooltipProps, ThemeConfig } from "../../types";
 import styled from "styled-components";
-import { ThemeConfig } from "../../types";
 
 export const TooltipContainerDiv = styled.div<{
   isLeaving: boolean;

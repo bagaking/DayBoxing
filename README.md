@@ -1,177 +1,282 @@
 # DayBoxing
 
-DayBoxing 是一个用于时间管理可视化的 React 组件库。它可以帮助你直观地展示和管理每天 24 小时的时间分配,支持多种作息模式(如普通、夜猫子、早起鸟等)的可视化展示。
+DayBoxing 是一个基于 React 的时间管理可视化组件库，它实现了 QH 分析法则，帮助你直观地展示和分析每日时间分配。
 
-## 特性
+## 功能特性
 
-- 📊 可视化展示每天 21 ~ 28 小时的时间分配
-- 🎨 支持多种预设主题(默认、浅色、深色)和自定义主题
-- ⌨️ 支持快捷键操作(s/w/b/r)快速切换时间类型
-- 📱 响应式设计,支持水平和垂直布局
-- 🔄 支持实时编辑和更新时间块
-- 🎯 支持 QH 分析法则,智能分析时间段特征
+- 🎯 基于 QH 分析法则
+  - 支持 A/B/C/F 四段时间分析
+  - 自动识别 Full/Mix/Balance/Chaos 四种时间段模式
+  - 智能计算时间分布比例
+- 🛠 灵活的配置选项
+  - 支持多种时间模式定义方式
+  - 可自定义主题和样式
+  - 支持快捷键操作
+- 📱 响应式设计
+  - 支持水平/垂直布局
+  - 自适应容器尺寸
 
 ## 安装
 
-使用 npm:
-
 ```bash
-npm install @bagaking/dayboxing
+npm install @bagaking/dayboxing 
+# or yarn install @bagaking/dayboxing
+# or pnpm install @bagaking/dayboxing
 ```
 
-使用 yarn:
+## 基础使用
 
-```bash
-yarn add @bagaking/dayboxing
-```
+### 快速开始
 
-使用 pnpm:
-
-```bash
-pnpm add @bagaking/dayboxing
-```
-
-## 基础用法
+最简单的使用方式是通过时间类型数组定义模式：
 
 ```tsx
 import { DayBoxing } from '@bagaking/dayboxing';
 
-// 定义一个基础的时间模式
+function App() {
+  return (
+    <DayBoxing 
+      patterns={[
+        // 每个字符串代表一个小时的时间类型
+        ["sleep", "sleep", "sleep", "work", "work", "base", "relax"]
+      ]}
+      dates={["2024-03-15"]}
+    />
+  );
+}
+```
+
+### 详细配置
+
+使用对象方式可以定义更详细的时间块信息：
+
+```tsx
 const pattern = {
-  startHour: 0, // 从当天0点开始
+  startHour: -3,  // 从前一天 21:00 开始
   blocks: [
-    { type: "sleep", duration: 8 }, // 睡眠 8 小时
-    { type: "work", duration: 9 },  // 工作 9 小时
-    { type: "base", duration: 3 },  // 基础活动 3 小时
-    { type: "relax", duration: 4 }, // 休闲 4 小时
-  ],
+    { type: "sleep", duration: 8, comment: "Night sleep" }, 
+    { type: "work", duration: 4, comment: "Morning focus" },
+    { type: "base", duration: 1, comment: "Lunch break" },
+    { type: "work", duration: 4, comment: "Afternoon work" },
+    { type: "relax", duration: 4, comment: "Evening activities" }
+  ]
 };
 
-const App = () => {
+function App() {
   return (
     <DayBoxing 
       patterns={[pattern]}
-      dates={["2024-01-15"]}
+      dates={["2024-03-15"]}
       editable={true}
-      shortcuts={{
-        s: "sleep",
-        w: "work",
-        b: "base",
-        r: "relax",
-      }}
     />
   );
-};
+}
 ```
 
-## 高级用法
-
-### 自定义主题
+### 也可以使用混合的写法
 
 ```tsx
-import { DayBoxing, lightTheme, darkTheme } from '@bagaking/dayboxing';
-
-const App = () => {
-  // 使用预设主题
-  return <DayBoxing theme={lightTheme} {...otherProps} />;
-  
-  // 或自定义主题
-  const customTheme = {
-    colors: {
-      sleep: "#A78BFA",
-      work: "#60A5FA",
-      base: "#34D399",
-      relax: "#FBBF24",
-      background: "#ffffff",
-      text: "#1f2937",
-    },
-    cellSize: 40,
-    gap: 2,
-    borderRadius: 4,
-  };
-  
-  return <DayBoxing theme={customTheme} {...otherProps} />;
+const pattern = {
+  startHour: -3,  // 从前一天 21:00 开始
+  blocks: [
+    "sleep", "sleep", "sleep", "sleep", "sleep", "sleep",
+    { type: "sleep", duration: 2, comment: "Dream" }, 
+    { type: "work", duration: 4, comment: "Morning focus" },
+    { type: "base", duration: 1, comment: "Lunch break" },
+    { type: "work", duration: 4, comment: "Afternoon work" },
+    { type: "relax", duration: 4, comment: "Evening activities" }
+  ]
 };
+
+## 高级特性
+
+### 主题定制
+
+```tsx
+const theme = {
+  colors: {
+    sleep: "#A78BFA",
+    work: "#60A5FA",
+    base: "#34D399",
+    relax: "#FBBF24",
+    background: "#ffffff",
+    text: "#1f2937",
+  },
+  cellSize: 40,
+  gap: 2,
+  borderRadius: 4,
+};
+
+<DayBoxing theme={theme} {...props} />
 ```
 
-### 快捷键支持
+### 快捷键配置
 
 ```tsx
 const shortcuts = {
   s: "sleep",
   w: "work",
   b: "base",
-  r: "relax",
+  r: "relax"
 };
 
 <DayBoxing 
   shortcuts={shortcuts}
   editable={true}
-  {...otherProps} 
+  {...props} 
 />
 ```
 
 ### 自定义渲染
 
 ```tsx
-const renderHour = (hour, date) => (
-  <div style={{ padding: '4px' }}>
-    {hour.hour}:00 - {hour.type}
+const CustomHour = ({ hour, date }) => (
+  <div className="hour-cell">
+    <div className="time">{hour.hour}:00</div>
+    {hour.comment && (
+      <div className="comment">{hour.comment}</div>
+    )}
   </div>
 );
 
-const renderDateLabel = (date) => (
-  <div style={{ fontWeight: 'bold' }}>
+const CustomDateLabel = ({ date }) => (
+  <div className="date-label">
     {new Date(date).toLocaleDateString()}
   </div>
 );
 
 <DayBoxing 
-  renderHour={renderHour}
-  renderDateLabel={renderDateLabel}
-  {...otherProps} 
+  renderHour={CustomHour}
+  renderDateLabel={CustomDateLabel}
+  {...props} 
 />
 ```
 
 ### 事件处理
 
 ```tsx
-const handleHourChange = (event) => {
-  console.log('Hour changed:', event);
-  // event: { hour: number, date: string, oldType: string, newType: string }
-};
+function App() {
+  const handleHourChange = (event) => {
+    const { hour, date, oldType, newType } = event;
+    console.log(`Hour ${hour} changed: ${oldType} -> ${newType}`);
+  };
 
-const handlePatternEdit = (event) => {
-  console.log('Pattern edited:', event);
-  // event: { date: string, type: string, payload: object }
-};
+  const handlePatternEdit = (event) => {
+    const { date, type, payload } = event;
+    console.log(`Pattern edited: ${type}`, payload);
+  };
 
-<DayBoxing 
-  onHourChange={handleHourChange}
-  onPatternEdit={handlePatternEdit}
-  {...otherProps} 
-/>
+  return (
+    <DayBoxing 
+      onHourChange={handleHourChange}
+      onPatternEdit={handlePatternEdit}
+      {...props} 
+    />
+  );
+}
 ```
 
-## API
+## API 参考
 
 ### DayBoxing Props
 
-| 属性 | 类型 | 默认值 | 描述 |
-|------|------|---------|------|
-| patterns | DayPattern[] | - | 时间模式数组 |
-| dates | string[] | - | 日期数组 |
-| direction | 'horizontal' \| 'vertical' | 'horizontal' | 布局方向 |
-| theme | Partial<ThemeConfig> | defaultTheme | 主题配置 |
-| showDateLabel | boolean | true | 是否显示日期标签 |
-| editable | boolean | false | 是否可编辑 |
-| shortcuts | Record<string, HourType> | {} | 快捷键配置 |
-| customTypes | Record<string, {color: string, label: string}> | - | 自定义时间类型 |
-| typeOrder | HourType[] | - | 时间类型切换顺序 |
-| onHourChange | (event: HourChangeEvent) => void | - | 小时变更回调 |
-| onPatternEdit | (event: PatternEditEvent) => void | - | 模式编辑回调 |
-| renderHour | (hour: HourData, date: string) => ReactNode | - | 自定义小时渲染 |
-| renderDateLabel | (date: string) => ReactNode | - | 自定义日期标签渲染 |
+| 属性 | 类型 | 必填 | 默认值 | 描述 |
+|------|------|------|--------|------|
+| patterns | (DayPattern \| string[])[] | ✓ | - | 时间模式数组 |
+| dates | string[] | ✓ | - | 日期数组 |
+| direction | 'horizontal' \| 'vertical' | | 'horizontal' | 布局方向 |
+| theme | ThemeConfig | | defaultTheme | 主题配置 |
+| editable | boolean | | false | 是否可编辑 |
+| shortcuts | Record<string, HourType> | | {} | 快捷映射 |
+| showDateLabel | boolean | | true | 是否显示日期标签 |
+| onHourChange | (event: HourChangeEvent) => void | | - | 时间类型变更回调 |
+| onPatternEdit | (event: PatternEditEvent) => void | | - | 模式编辑回调 |
+| renderHour | (hour: HourData, date: string) => ReactNode | | - | 自定义小时渲染 |
+| renderDateLabel | (date: string) => ReactNode | | - | 自定义日期标签渲染 |
+
+### 类型定义
+
+```typescript
+interface DayPattern {
+  startHour?: number;
+  blocks: Array<{
+    type: HourType;
+    duration: number;
+    comment?: string;
+  }>;
+}
+
+type HourType = "sleep" | "work" | "base" | "relax";
+
+interface HourChangeEvent {
+  hour: number;
+  date: string;
+  oldType: HourType;
+  newType: HourType;
+  comment?: string;
+}
+
+interface PatternEditEvent {
+  date: string;
+  type: "moveStart" | "addBlock" | "removeBlock" | "updateBlock";
+  payload: any;
+}
+```
+
+## Qh 分析策略
+
+DayBoxing 基于 QH 分析法则，将一天划分为四个时间段（A/B/C/F），用于分析时间分配的合理性。
+
+### 时间段划分
+
+- **A 段**（7小时）：通常是完整的睡眠时间
+- **B 段**（7小时）：通常是核心工作时间
+- **C 段**（7小时）：混合时间段
+- **F 段**（0-7小时）：灵活时间段，长度可变
+
+### 时间段模式
+
+每个时间段都会被自动分析并归类为以下模式之一：
+
+- **Full Part (FP)**
+  - 单一类型时间占比 ≥ 80%
+  - 例如：S(fp) 表示整段都是睡眠时间
+
+- **Mix Part (MP)**
+  - 主导类型占比 60-80%
+  - 次要类型至少 2 小时
+  - 例如：W-B(mp) 表示以工作为主，基础活动为辅
+
+- **Balance Part (BP)**
+  - 两种类型各占比 ≥ 35%
+  - 例如：W-R(bp) 表示工作和休息时间大致相当
+
+- **Chaos Part (CP)**
+  - 三种及以上类型各占比 ≥ 20%
+  - 通常表示时间管理效率较低
+
+### 分析规则
+
+- A 段理想状态应为 S(fp)，否则表示睡眠时间不足
+- B 段建议为 Mix Part，避免出现 Chaos Part
+- C 段可以是任意类型，但不建议是 Chaos Part
+- F 段长度可变（0-7小时），用于调节作息灵活性
+
+```tsx
+// 一个良好的时间分配示例
+const pattern = {
+  startHour: -3,  // 21:00 开始
+  blocks: [
+    { type: "sleep", duration: 8 },  // A段: S(fp)
+    { type: "work", duration: 6 },   // B段: W-B(mp)
+    { type: "base", duration: 1 },
+    { type: "work", duration: 4 },   // C段: W-R(bp)
+    { type: "relax", duration: 3, comment: "Evening activities" },
+    { type: "relax", duration: 2 }   // F段: R(fp)
+  ]
+};
+```
+
 
 ## License
 

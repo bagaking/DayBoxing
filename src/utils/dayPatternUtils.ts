@@ -1,4 +1,4 @@
-import { DayPattern, TimeBlock, PatternEditEvent } from "../types";
+import { DayPattern, TimeBlock, HourType, PatternEditEvent } from "../types";
 
 export const editPattern = (
   pattern: DayPattern,
@@ -45,10 +45,21 @@ export const createHoursFromPattern = (pattern: DayPattern) => {
   let currentHour = pattern.startHour;
 
   for (const block of pattern.blocks) {
-    for (let i = 0; i < block.duration; i++) {
+    if (typeof block === "string") {
       hours.push({
         hour: currentHour,
-        type: block.type,
+        type: block as HourType,
+      });
+      currentHour++;
+      continue;
+    }
+
+    const timeBlock = block as TimeBlock;
+    for (let i = 0; i < timeBlock.duration; i++) {
+      hours.push({
+        hour: currentHour,
+        type: timeBlock.type,
+        comment: timeBlock.comment,
       });
       currentHour++;
     }

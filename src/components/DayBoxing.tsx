@@ -26,6 +26,7 @@ export const DayBoxing: React.FC<DayBoxingProps> = ({
   typeOrder,
   onPatternEdit,
 }) => {
+  const containerRef = useRef<HTMLDivElement>(null);
   const theme = useMemo(
     () => ({ ...defaultTheme, ...customTheme }),
     [customTheme]
@@ -79,14 +80,16 @@ export const DayBoxing: React.FC<DayBoxingProps> = ({
       }
 
       if (data) {
+        const dayData = daysData.find((d) => d.date === data.date);
+        const hourData = dayData?.hours.find((h) => h.hour === data.hour);
+
         setTooltip({
           data: {
             ...data,
-            segment: daysData
-              .find((d) => d.date === data.date)
-              ?.segments.find(
-                (s) => data.hour >= s.startHour && data.hour < s.endHour
-              ),
+            comment: hourData?.comment,
+            segment: dayData?.segments.find(
+              (s) => data.hour >= s.startHour && data.hour < s.endHour
+            ),
           },
           position: { x: event.pageX, y: event.pageY },
         });
@@ -108,7 +111,15 @@ export const DayBoxing: React.FC<DayBoxingProps> = ({
   }, []);
 
   return (
-    <div className="day-boxing" style={{ padding: theme.gap * 2 }}>
+    <div
+      ref={containerRef}
+      className="day-boxing"
+      style={{
+        padding: theme.gap * 2,
+        position: "relative",
+        overflow: "hidden",
+      }}
+    >
       <DayBoxingGrid
         data={daysData}
         direction={direction}
@@ -121,7 +132,9 @@ export const DayBoxing: React.FC<DayBoxingProps> = ({
         customTypes={customTypes}
         onHover={handleHover}
       />
-      {tooltip && <Tooltip {...tooltip} theme={theme} />}
+      {tooltip && (
+        <Tooltip {...tooltip} theme={theme} containerRef={containerRef} />
+      )}
     </div>
   );
 };

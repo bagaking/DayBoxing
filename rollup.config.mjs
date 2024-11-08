@@ -1,6 +1,7 @@
 import typescript from '@rollup/plugin-typescript';
 import commonjs from '@rollup/plugin-commonjs';
 import resolve from '@rollup/plugin-node-resolve';
+import babel from '@rollup/plugin-babel';
 import peerDepsExternal from 'rollup-plugin-peer-deps-external';
 import { terser } from 'rollup-plugin-terser';
 
@@ -28,6 +29,13 @@ export default {
     peerDepsExternal(),
     resolve(),
     commonjs(),
+    babel({
+      babelHelpers: 'bundled',
+      presets: ['@babel/preset-react', '@babel/preset-typescript'],
+      plugins: ['babel-plugin-styled-components'],
+      extensions: ['.js', '.jsx', '.ts', '.tsx'],
+      exclude: 'node_modules/**'
+    }),
     typescript({
       tsconfig: './tsconfig.json',
       declaration: true,
@@ -36,5 +44,5 @@ export default {
     }),
     terser()
   ],
-  external: ['react', 'react-dom', '@emotion/react', '@emotion/styled']
+  external: ['react', 'react-dom', 'styled-components']
 }; 

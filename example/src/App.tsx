@@ -6,7 +6,7 @@ import {
   lightTheme,
   darkTheme,
 } from "@bagaking/dayboxing";
-import { editPattern } from "@bagaking/dayboxing/utils/dayPatternUtils";
+import { editPattern } from "@bagaking/dayboxing";
 
 const predefinedPatterns = {
   normal: {
@@ -21,7 +21,8 @@ const predefinedPatterns = {
   nightOwl: {
     startHour: 4,
     blocks: [
-      { type: "sleep", duration: 8 },
+      { type: "sleep", duration: 7 },
+      { type: "sleep", duration: 1, comment: "晚上睡得晚, 早上起得晚" },
       { type: "work", duration: 9 },
       { type: "base", duration: 3 },
       { type: "relax", duration: 2 },
@@ -30,23 +31,59 @@ const predefinedPatterns = {
   earlyBird: {
     startHour: -3,
     blocks: [
-      { type: "sleep", duration: 7 },
+      {
+        type: "sleep",
+        duration: 7,
+        comment: "起来时精神状态不错, 天还没完全亮",
+      },
       { type: "work", duration: 9 },
       { type: "base", duration: 3 },
       { type: "relax", duration: 4 },
     ],
   },
-} as const;
+  special: {
+    startHour: 2,
+    blocks: [
+      "sleep",
+      "sleep",
+      "sleep",
+      "sleep",
+      "sleep",
+      "sleep",
+      "sleep",
+      "work",
+      "work",
+      "work",
+      "work",
+      "relax",
+      "relax",
+      "work",
+      "work",
+      "work",
+      "work",
+      "base",
+      "base",
+      "work",
+      "work",
+      "work",
+      "work",
+      "work",
+      "work",
+      "base",
+    ],
+  },
+};
 
 const App: React.FC = () => {
   const [theme, setTheme] = useState<"default" | "light" | "dark">("default");
   const [patterns, setPatterns] = useState<DayPattern[]>([
-    predefinedPatterns.normal,
-    predefinedPatterns.nightOwl,
-    predefinedPatterns.earlyBird,
+    { ...predefinedPatterns.normal } as DayPattern,
+    { ...predefinedPatterns.nightOwl } as DayPattern,
+    { ...predefinedPatterns.earlyBird } as DayPattern,
+    { ...predefinedPatterns.special } as DayPattern,
   ]);
 
-  const dates = ["2024-01-10", "2024-01-11", "2024-01-12"];
+  const dates = ["2024-01-10", "2024-01-11", "2024-01-12", "2024-11-12"];
 
   const handlePatternEdit = (event: PatternEditEvent) => {
     const index = dates.indexOf(event.date);
@@ -84,14 +121,14 @@ const App: React.FC = () => {
       }}
     >
       <h1>DayBoxing Demo</h1>
-      <div style={{ marginBottom: "20px" }}>
+      <div style={{ marginBottom: "20px", gap: "10px" }}>
         <button onClick={() => setTheme("default")}>默认主题</button>
         <button onClick={() => setTheme("light")}>浅色主题</button>
         <button onClick={() => setTheme("dark")}>深色主题</button>
       </div>
       <div style={{ marginBottom: "20px" }}>
         <h2>不同作息模式</h2>
-        <p>展示了普通、夜猫子和早起鸟三种不同的作息时间模式</p>
+        <p>展示了普通人、夜猫子、早起鸟、程序猿四种不同的作息时间模式</p>
         <p>点击方块或使用快捷键 (s/w/b/r) 修改时间类型</p>
       </div>
       <DayBoxing

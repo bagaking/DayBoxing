@@ -21,6 +21,7 @@ export interface DaySegment {
 export interface HourData {
   hour: number;
   type: HourType;
+  comment?: string;
 }
 
 // Day data
@@ -76,6 +77,7 @@ export interface HourTooltipData {
   type: HourType;
   date: string;
   segment?: DaySegment;
+  comment?: string;
 }
 
 // Data modification event
@@ -84,6 +86,7 @@ export interface HourChangeEvent {
   date: string;
   oldType: HourType;
   newType: HourType;
+  comment?: string;
 }
 
 // 添加新的类型定义
@@ -130,12 +133,13 @@ export interface QHAnalysis {
 // 在已有的类型定义中添加
 export interface TimeBlock {
   type: HourType;
-  duration: number; // 持续小时数
+  duration: number;
+  comment?: string;
 }
 
 export interface DayPattern {
-  startHour: number; // 可以是负数，表示从前一天开始
-  blocks: TimeBlock[]; // 时间块定义
+  startHour: number;
+  blocks: (TimeBlock | HourType)[];
 }
 
 // 添加编辑操作的事件类型

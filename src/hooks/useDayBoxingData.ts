@@ -33,7 +33,7 @@ export const useDayBoxingData = ({
   );
 
   const updateHour = useCallback(
-    (date: string, hour: number, newType: HourType) => {
+    (date: string, hour: number, newType: HourType, comment?: string) => {
       setData((prevData) => {
         return prevData.map((day) => {
           if (day.date !== date) return day;
@@ -43,7 +43,11 @@ export const useDayBoxingData = ({
 
           const hourData = day.hours[hourIndex];
           const newHours = [...day.hours];
-          newHours[hourIndex] = { ...hourData, type: newType };
+          newHours[hourIndex] = {
+            ...hourData,
+            type: newType,
+            comment: comment || hourData.comment,
+          };
 
           // 触发 onChange 回调
           onChange?.({
@@ -51,6 +55,7 @@ export const useDayBoxingData = ({
             date,
             oldType: hourData.type,
             newType,
+            comment,
           });
 
           const updatedDay = {

@@ -15,7 +15,12 @@ export interface HourCellProps {
   onChange?: (event: HourChangeEvent) => void;
   render?: (hour: HourData, date: string) => React.ReactNode;
   onHover?: (
-    data: { hour: number; type: HourType; date: string } | null,
+    data: {
+      hour: number;
+      type: HourType;
+      date: string;
+      comment?: string;
+    } | null,
     event: React.MouseEvent
   ) => void;
 }
@@ -39,7 +44,15 @@ export const HourCell: React.FC<HourCellProps> = ({
 
   const handleMouseEnter = (e: React.MouseEvent) => {
     if (onHover) {
-      onHover({ hour: hour.hour, type: hour.type, date }, e);
+      onHover(
+        {
+          hour: hour.hour,
+          type: hour.type,
+          date,
+          comment: hour.comment,
+        },
+        e
+      );
     }
   };
 

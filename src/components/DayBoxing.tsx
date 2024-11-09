@@ -17,6 +17,8 @@ import { useDayBoxingData } from "../hooks/useDayBoxingData";
 import { DayBoxingGrid } from "./DayBoxingGrid";
 import { Tooltip, SegAnalysisTooltip } from "./Tooltip";
 
+const TOOLTIP_CONTAINER_PIN_CLASS_NAME = "tooltip-container-pin";
+
 export const DayBoxing: React.FC<DayBoxingProps> = ({
   patterns,
   dates,
@@ -33,6 +35,7 @@ export const DayBoxing: React.FC<DayBoxingProps> = ({
   onPatternEdit,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
+
   const theme = useMemo(
     () => ({ ...defaultTheme, ...customTheme }),
     [customTheme]
@@ -84,6 +87,52 @@ export const DayBoxing: React.FC<DayBoxingProps> = ({
 
   const activeTooltipRef = useRef<"hour" | "segment" | null>(null);
 
+  const calculateTooltipPosition = useCallback((e: React.MouseEvent) => {
+    let mousePos = { x: e.pageX, y: e.pageY };
+    let target = e.target as HTMLElement;
+    if (!target) return mousePos;
+
+    if (!containerRef.current) return mousePos;
+    // Get container bounds
+    const containerRect = target
+      .closest(`.${TOOLTIP_CONTAINER_PIN_CLASS_NAME}`)
+      ?.getBoundingClientRect();
+    if (!containerRect) return mousePos;
+
+    // 现在 containerRect 和 mouse 坐标都是相对于视口的了
+    const containerCenterX = containerRect.left + containerRect.width / 2;
+    const containerCenterY = containerRect.top + containerRect.height / 2;
+
+    const targetRect = target.getBoundingClientRect();
+    const targetCenter = {
+      x: targetRect.left + targetRect.width / 2,
+      y: targetRect.top + targetRect.height / 2,
+    };
+
+    // Determine tooltip position based on which quadrant the mouse is in
+    if (targetCenter.x > containerCenterX) {
+      // Mouse is on right side
+      mousePos.x -= 320; // Move tooltip to left
+    }
+
+    if (targetCenter.y > containerCenterY) {
+      // Mouse is below center
+      mousePos.y -= 160; // Move tooltip up
+    }
+
+    console.log(
+      "Tooltip is in the same container",
+      containerRef,
+      containerRect,
+      { containerCenterX, containerCenterY },
+
+      { x: e.pageX, y: e.pageY },
+      mousePos
+    );
+
+    return mousePos;
+  }, []);
+
   const handleHourHover = useCallback(
     (data: HourTooltipData | null, event: React.MouseEvent) => {
       if (tooltipTimeoutRef.current) {
@@ -102,6 +151,9 @@ export const DayBoxing: React.FC<DayBoxingProps> = ({
         const dayData = daysData.find((d) => d.date === data.date);
         const hourData = dayData?.hours.find((h) => h.hour === data.hour);
 
+        // Calculate tooltip position
+        const position = calculateTooltipPosition(event);
+
         setHourTooltip({
           data: {
             ...data,
@@ -110,7 +162,7 @@ export const DayBoxing: React.FC<DayBoxingProps> = ({
               (s) => data.hour >= s.startHour && data.hour < s.endHour
             ),
           },
-          position: { x: event.pageX, y: event.pageY },
+          position,
         });
       } else {
         tooltipTimeoutRef.current = window.setTimeout(() => {
@@ -121,7 +173,7 @@ export const DayBoxing: React.FC<DayBoxingProps> = ({
         }, 100) as unknown as number;
       }
     },
-    [daysData, segmentTooltip]
+    [daysData, segmentTooltip, calculateTooltipPosition]
   );
 
   const handleSegmentHover = useCallback(
@@ -140,11 +192,17 @@ export const DayBoxing: React.FC<DayBoxingProps> = ({
           d.qhSegments?.some((s) => s.segment === segment.segment)
         );
 
+        // Calculate tooltip position
+        const position = calculateTooltipPosition(event);
+
         setSegmentTooltip({
           segment,
           allSegments: dayData?.qhSegments || [],
           days: daysData,
-          position: { x: event.pageX + 12, y: event.pageY },
+          position: {
+            x: position.x + 48,
+            y: (position.y + event.pageY * 2) / 3,
+          },
           isLeaving: false,
           isTransitioning: false,
         });
@@ -212,6 +270,7 @@ export const DayBoxing: React.FC<DayBoxingProps> = ({
       }}
     >
       <DayBoxingGrid
+        pinClassName={TOOLTIP_CONTAINER_PIN_CLASS_NAME}
         data={daysData}
         direction={direction}
         theme={theme}

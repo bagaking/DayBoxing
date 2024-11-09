@@ -8,11 +8,11 @@ export interface ExtendedDayRowProps extends DayRowProps {
     segment: QHAnalysis | null,
     event: React.MouseEvent
   ) => void;
+  pinClassName?: string;
 }
 
 export const DayRow: React.FC<ExtendedDayRowProps> = ({
   day,
-  direction,
   theme,
   showDateLabel,
   renderDateLabel,
@@ -22,6 +22,7 @@ export const DayRow: React.FC<ExtendedDayRowProps> = ({
   customTypes,
   onHover,
   onSegmentHover,
+  pinClassName,
 }) => {
   // 将小时分组为每行7个
   const hourRows = day.hours.reduce<HourData[][]>((acc, hour, index) => {
@@ -35,7 +36,7 @@ export const DayRow: React.FC<ExtendedDayRowProps> = ({
 
   return (
     <div
-      className="day-row"
+      className={`day-row ${pinClassName}`}
       style={{
         display: "flex",
         flexDirection: "row",

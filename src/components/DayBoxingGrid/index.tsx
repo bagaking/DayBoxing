@@ -14,6 +14,7 @@ export interface ExtendedDayBoxingGridProps extends DayBoxingGridProps {
     segment: QHAnalysis | null,
     event: React.MouseEvent
   ) => void;
+  pinClassName?: string;
 }
 
 export const DayBoxingGrid: React.FC<ExtendedDayBoxingGridProps> = ({
@@ -28,6 +29,7 @@ export const DayBoxingGrid: React.FC<ExtendedDayBoxingGridProps> = ({
   customTypes,
   onHover,
   onSegmentHover,
+  pinClassName,
 }) => {
   return (
     <div
@@ -40,6 +42,7 @@ export const DayBoxingGrid: React.FC<ExtendedDayBoxingGridProps> = ({
     >
       {data.map((day) => (
         <DayRow
+          pinClassName={pinClassName}
           key={day.date}
           day={day}
           direction={direction}

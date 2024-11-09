@@ -22,7 +22,7 @@ export const TooltipContainerDiv = styled.div<{
     props.isLeaving ? "translateY(10px)" : "translateY(0)"};
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1),
     transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-  pointer-events: ${(props) => (props.isTransitioning ? "none" : "auto")};
+  pointer-events: none;
   overflow: hidden;
 
   &::before {
@@ -38,7 +38,6 @@ export const TooltipContainerDiv = styled.div<{
       transparent 40%
     );
     z-index: 0;
-    pointer-events: none;
   }
 
   & > * {
@@ -51,6 +50,16 @@ export const TooltipContainerDiv = styled.div<{
     background: rgba(255, 255, 255, 0.7);
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1),
       inset 0 0 0 1px rgba(255, 255, 255, 0.6);
+    pointer-events: none;
+  }
+
+  button,
+  a,
+  [role="button"],
+  input,
+  select,
+  textarea {
+    pointer-events: auto;
   }
 `;
 
@@ -66,6 +75,7 @@ export const TimeBlockDiv = styled.div`
   font-weight: 600;
   position: relative;
   box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.25);
+  pointer-events: none;
 `;
 
 export const PreviousDayBadgeDiv = styled.div`
@@ -79,6 +89,7 @@ export const PreviousDayBadgeDiv = styled.div`
   border-radius: 4px;
   font-weight: normal;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  pointer-events: none;
 `;
 
 export const CommentSection = styled.div`
@@ -90,6 +101,7 @@ export const CommentSection = styled.div`
   padding-left: 14px;
   font-weight: 400;
   letter-spacing: 0.2px;
+  pointer-events: none;
 
   &::before {
     content: '"';
@@ -100,6 +112,7 @@ export const CommentSection = styled.div`
     line-height: 1;
     font-family: Georgia, serif;
     color: rgba(0, 0, 0, 0.15);
+    pointer-events: none;
   }
 `;
 
@@ -120,8 +133,6 @@ const useTooltipPosition = (
 
     const tooltipRect = tooltip.getBoundingClientRect();
     const containerRect = container.getBoundingClientRect();
-    const viewportHeight = window.innerHeight;
-    const viewportWidth = window.innerWidth;
 
     // 计算可用空间
     const spaceAbove = initialPosition.y - containerRect.top;
@@ -299,6 +310,7 @@ export const Tooltip: React.FC<
         left: position.x,
         top: position.y,
         position: "fixed",
+        pointerEvents: "none",
       }}
     >
       <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
@@ -452,6 +464,7 @@ export const Tooltip: React.FC<
             display: "flex",
             gap: "8px",
             alignItems: "center",
+            pointerEvents: "none",
           }}
         >
           <span>Press</span>
@@ -463,6 +476,7 @@ export const Tooltip: React.FC<
                 backgroundColor: "rgba(0,0,0,0.05)",
                 borderRadius: "4px",
                 fontSize: "11px",
+                pointerEvents: "none",
               }}
             >
               {key}

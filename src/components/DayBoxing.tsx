@@ -120,15 +120,15 @@ export const DayBoxing: React.FC<DayBoxingProps> = ({
       mousePos.y -= 160; // Move tooltip up
     }
 
-    console.log(
-      "Tooltip is in the same container",
-      containerRef,
-      containerRect,
-      { containerCenterX, containerCenterY },
+    // console.log(
+    //   "Tooltip is in the same container",
+    //   containerRef,
+    //   containerRect,
+    //   { containerCenterX, containerCenterY },
 
-      { x: e.pageX, y: e.pageY },
-      mousePos
-    );
+    //   { x: e.pageX, y: e.pageY },
+    //   mousePos
+    // );
 
     return mousePos;
   }, []);

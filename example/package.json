@@ -9,7 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@bagaking/dayboxing": "workspace:*"
+    "@bagaking/dayboxing": "link:../"
   },
   "devDependencies": {
     "@types/react": "^18.2.48",

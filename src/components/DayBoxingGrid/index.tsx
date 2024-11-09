@@ -1,6 +1,6 @@
 import React from "react";
 import { DayRow } from "./DayRow";
-import { DayBoxingGridProps } from "../../types";
+import { DayBoxingGridProps, QHAnalysis } from "../../types";
 
 export interface ExtendedDayBoxingGridProps extends DayBoxingGridProps {
   customTypes?: {
@@ -10,6 +10,10 @@ export interface ExtendedDayBoxingGridProps extends DayBoxingGridProps {
     };
   };
   onHover?: (data: any, event: React.MouseEvent) => void;
+  onSegmentHover?: (
+    segment: QHAnalysis | null,
+    event: React.MouseEvent
+  ) => void;
 }
 
 export const DayBoxingGrid: React.FC<ExtendedDayBoxingGridProps> = ({
@@ -23,6 +27,7 @@ export const DayBoxingGrid: React.FC<ExtendedDayBoxingGridProps> = ({
   editable,
   customTypes,
   onHover,
+  onSegmentHover,
 }) => {
   return (
     <div
@@ -46,6 +51,7 @@ export const DayBoxingGrid: React.FC<ExtendedDayBoxingGridProps> = ({
           editable={editable}
           customTypes={customTypes}
           onHover={onHover}
+          onSegmentHover={onSegmentHover}
         />
       ))}
     </div>

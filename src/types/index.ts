@@ -155,3 +155,36 @@ export interface PatternEditEvent {
     block?: TimeBlock;
   };
 }
+
+interface SegAnalysisTooltipProps {
+  segment: QHAnalysis;
+  allSegments: QHAnalysis[];
+  days?: DayData[]; // 添加可选的历史数据
+  position: { x: number; y: number };
+  theme: ThemeConfig;
+  isLeaving: boolean;
+  isTransitioning: boolean;
+  onMouseEnter?: () => void;
+  onMouseLeave?: () => void;
+}
+
+// 添加 AnalysisStatus 类型
+export type AnalysisStatus = "success" | "warning" | "normal";
+
+// 添加 SegmentAnalysis 接口
+export interface SegmentAnalysis {
+  status: AnalysisStatus;
+  message: string;
+}
+
+// 添加 AnalysisResult 接口
+export interface AnalysisResult {
+  type: "success" | "warning";
+  title: string;
+  advices: string[];
+  stats: {
+    duration: number;
+    mainTypePercent: number;
+    secondaryTypePercent: number;
+  };
+}

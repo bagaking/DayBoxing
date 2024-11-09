@@ -1,9 +1,16 @@
 import React from "react";
 import { HourCell } from "./HourCell";
 import { QHSegments } from "./QHSegments";
-import { DayRowProps, HourData } from "../../types";
+import { DayRowProps, HourData, QHAnalysis } from "../../types";
 
-export const DayRow: React.FC<DayRowProps> = ({
+export interface ExtendedDayRowProps extends DayRowProps {
+  onSegmentHover?: (
+    segment: QHAnalysis | null,
+    event: React.MouseEvent
+  ) => void;
+}
+
+export const DayRow: React.FC<ExtendedDayRowProps> = ({
   day,
   direction,
   theme,
@@ -14,6 +21,7 @@ export const DayRow: React.FC<DayRowProps> = ({
   editable,
   customTypes,
   onHover,
+  onSegmentHover,
 }) => {
   // 将小时分组为每行7个
   const hourRows = day.hours.reduce<HourData[][]>((acc, hour, index) => {
@@ -46,7 +54,11 @@ export const DayRow: React.FC<DayRowProps> = ({
             paddingTop: showDateLabel ? "24px" : 0,
           }}
         >
-          <QHSegments segments={day.qhSegments} theme={theme} />
+          <QHSegments
+            segments={day.qhSegments}
+            theme={theme}
+            onSegmentHover={onSegmentHover}
+          />
         </div>
       )}
       <div

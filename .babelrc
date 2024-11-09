@@ -5,13 +5,6 @@
     "@babel/preset-typescript"
   ],
   "plugins": [
-    [
-      "babel-plugin-styled-components",
-      {
-        "ssr": false,
-        "displayName": true,
-        "fileName": false
-      }
-    ]
+    "babel-plugin-styled-components"
   ]
 } 

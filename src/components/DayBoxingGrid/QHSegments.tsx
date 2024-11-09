@@ -22,19 +22,21 @@ export const SegmentsContainer = styled.div<{ theme: ThemeConfig }>`
   width: 150px;
 `;
 
-export const SegmentItem = styled.div<{ theme: ThemeConfig }>`
-  height: ${(props) => props.theme.cellSize}px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 0 8px;
-  background-color: rgba(255, 255, 255, 0.98);
-  border-radius: ${(props) => props.theme.borderRadius}px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-  position: relative;
-  cursor: pointer;
-  transition: all 0.2s ease;
-
+const SegmentItem = styled.div.attrs<{ theme: ThemeConfig }>((props) => ({
+  style: {
+    height: `${props.theme.cellSize}px`,
+    display: "flex",
+    alignItems: "center",
+    gap: "6px",
+    padding: "0 8px",
+    backgroundColor: "rgba(255, 255, 255, 0.98)",
+    borderRadius: `${props.theme.borderRadius}px`,
+    boxShadow: "0 1px 3px rgba(0, 0, 0, 0.05)",
+    position: "relative",
+    cursor: "pointer",
+    transition: "all 0.2s ease",
+  },
+}))`
   &:hover {
     background-color: rgba(255, 255, 255, 1);
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);

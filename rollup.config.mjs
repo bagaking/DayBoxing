@@ -11,28 +11,23 @@ export default {
     {
       dir: 'dist',
       format: 'cjs',
-      entryFileNames: '[name].cjs.js',
+      entryFileNames: '[name].js',
       sourcemap: true,
-      preserveModules: true,
-      preserveModulesRoot: 'src'
     },
     {
       dir: 'dist',
       format: 'esm',
       entryFileNames: '[name].esm.js',
       sourcemap: true,
-      preserveModules: true,
-      preserveModulesRoot: 'src'
     }
   ],
   plugins: [
     peerDepsExternal(),
     resolve({
-      preferBuiltins: true,
-      resolveOnly: [/^(?!babel-plugin-styled-components)/]
+      extensions: ['.js', '.jsx', '.ts', '.tsx']
     }),
     commonjs({
-      include: /node_modules/
+      include: /node_modules/,
     }),
     babel({
       babelHelpers: 'bundled',
@@ -42,14 +37,14 @@ export default {
         '@babel/preset-typescript'
       ],
       plugins: [
-        [
-          'babel-plugin-styled-components',
-          {
-            ssr: false,
-            displayName: true,
-            fileName: false
-          }
-        ]
+        ['babel-plugin-styled-components', {
+          pure: true,
+          displayName: true,
+          fileName: false,
+          transpileTemplateLiterals: true,
+          minify: true,
+          ssr: false
+        }]
       ],
       extensions: ['.js', '.jsx', '.ts', '.tsx'],
       exclude: 'node_modules/**'

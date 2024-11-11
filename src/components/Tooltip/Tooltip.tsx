@@ -1,326 +1,112 @@
-import React, { useEffect, useState, useRef } from "react";
-import { TooltipProps, ThemeConfig } from "../../types";
-import styled from "styled-components";
+import React, { useEffect, useState } from "react";
+import { useFloatingTooltip } from "../../hooks/useFloatingTooltip";
 
-export const TooltipContainerDiv = styled.div<{
-  isLeaving: boolean;
-  isTransitioning: boolean;
+import { HourTooltipData, ThemeConfig } from "../../types";
+import { formatHourClip24 as formatHour } from "../../utils/qhAnalysis";
+
+import {
+  TooltipContainerDiv,
+  TimeBlockDiv,
+  PreviousDayBadgeDiv,
+  CommentSection,
+} from "./styles";
+
+interface TooltipProps {
+  data: HourTooltipData | null;
+  position: { x: number; y: number };
   theme: ThemeConfig;
-}>`
-  position: fixed;
-  backdrop-filter: blur(8px);
-  background: rgba(255, 255, 255, 0.65);
-  padding: 20px;
-  border-radius: ${(props) => props.theme.borderRadius * 2}px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.5);
-  z-index: 1000;
-  min-width: 320px;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  opacity: ${(props) => (props.isLeaving ? 0 : 1)};
-  transform: ${(props) =>
-    props.isLeaving ? "translateY(10px)" : "translateY(0)"};
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-    transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-  pointer-events: none;
-  overflow: hidden;
+  containerRef?: React.RefObject<HTMLDivElement>;
+  boundaryRef?: React.RefObject<HTMLDivElement>;
+  isLeaving?: boolean;
+  isTransitioning?: boolean;
+}
 
-  &::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: radial-gradient(
-      600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
-      rgba(255, 255, 255, 0.08),
-      transparent 40%
-    );
-    z-index: 0;
-  }
-
-  & > * {
-    position: relative;
-    z-index: 1;
-    pointer-events: auto;
-  }
-
-  &:hover {
-    background: rgba(255, 255, 255, 0.7);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1),
-      inset 0 0 0 1px rgba(255, 255, 255, 0.6);
-    pointer-events: none;
-  }
-
-  button,
-  a,
-  [role="button"],
-  input,
-  select,
-  textarea {
-    pointer-events: auto;
-  }
-`;
-
-export const TimeBlockDiv = styled.div`
-  width: 48px;
-  height: 48px;
-  border-radius: 14px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 22px;
-  color: #fff;
-  font-weight: 600;
-  position: relative;
-  box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.25);
-  pointer-events: none;
-`;
-
-export const PreviousDayBadgeDiv = styled.div`
-  position: absolute;
-  top: -8px;
-  right: -8px;
-  background-color: ${(props) => props.theme.colors.background};
-  color: ${(props) => props.theme.colors.text};
-  font-size: 10px;
-  padding: 2px 6px;
-  border-radius: 4px;
-  font-weight: normal;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  pointer-events: none;
-`;
-
-export const CommentSection = styled.div`
-  margin-top: 8px;
-  font-size: 13px;
-  line-height: 1.6;
-  color: rgba(0, 0, 0, 0.55);
-  position: relative;
-  padding-left: 14px;
-  font-weight: 400;
-  letter-spacing: 0.2px;
-  pointer-events: none;
-
-  &::before {
-    content: '"';
-    position: absolute;
-    left: 0;
-    top: 2px;
-    font-size: 18px;
-    line-height: 1;
-    font-family: Georgia, serif;
-    color: rgba(0, 0, 0, 0.15);
-    pointer-events: none;
-  }
-`;
-
-const useTooltipPosition = (
-  initialPosition: { x: number; y: number },
-  tooltipRef: React.RefObject<HTMLDivElement>,
-  containerRef: React.RefObject<HTMLDivElement>
-) => {
-  const [position, setPosition] = useState(initialPosition);
-
-  useEffect(() => {
-    const tooltip = tooltipRef.current;
-    const container = containerRef.current;
-    if (!tooltip || !container) return;
-
-    const MARGIN = 12;
-    const MOUSE_BUFFER = 16; // 减小鼠标和 tooltip 之间的距离
-
-    const tooltipRect = tooltip.getBoundingClientRect();
-    const containerRect = container.getBoundingClientRect();
-
-    // 计算可用空间
-    const spaceAbove = initialPosition.y - containerRect.top;
-    const spaceBelow = containerRect.bottom - initialPosition.y;
-    const spaceLeft = initialPosition.x - containerRect.left;
-    const spaceRight = containerRect.right - initialPosition.x;
-
-    let x = initialPosition.x;
-    let y = initialPosition.y;
-
-    // 优化水平位置计算
-    if (spaceRight >= tooltipRect.width + MARGIN) {
-      // 优先显示在鼠标右侧，但不要太远
-      x = initialPosition.x + MOUSE_BUFFER;
-    } else if (spaceLeft >= tooltipRect.width + MARGIN) {
-      // 其次显示在鼠标左侧，但要保持适当距离
-      x = initialPosition.x - tooltipRect.width - MOUSE_BUFFER;
-    } else {
-      // 如果左右都放不下，则水平居中显示
-      x = Math.max(
-        containerRect.left + MARGIN,
-        Math.min(
-          initialPosition.x - tooltipRect.width / 2,
-          containerRect.right - tooltipRect.width - MARGIN
-        )
-      );
-    }
-
-    // 优化垂直位置计算
-    if (spaceBelow >= tooltipRect.height + MARGIN) {
-      // 优先显示在鼠标下方，但不要太远
-      y = initialPosition.y + MOUSE_BUFFER;
-    } else if (spaceAbove >= tooltipRect.height + MARGIN) {
-      // 其次显示在鼠标上方，保持适当距离
-      y = initialPosition.y - tooltipRect.height - MOUSE_BUFFER;
-    } else {
-      // 如果上下都放不下，则垂直居中显示
-      y = Math.max(
-        containerRect.top + MARGIN,
-        Math.min(
-          initialPosition.y - tooltipRect.height / 2,
-          containerRect.bottom - tooltipRect.height - MARGIN
-        )
-      );
-    }
-
-    // 确保不超出视口和容器边界
-    x = Math.max(
-      containerRect.left + MARGIN,
-      Math.min(x, containerRect.right - tooltipRect.width - MARGIN)
-    );
-    y = Math.max(
-      containerRect.top + MARGIN,
-      Math.min(y, containerRect.bottom - tooltipRect.height - MARGIN)
-    );
-
-    setPosition({ x, y });
-  }, [initialPosition, tooltipRef, containerRef]);
-
-  return position;
+// 从 theme 获取颜色
+const getSegmentColor = (type: string, theme: ThemeConfig) => {
+  return theme.colors[type as keyof typeof theme.colors] || theme.colors.life;
 };
 
-export const Tooltip: React.FC<
-  TooltipProps & { containerRef: React.RefObject<HTMLDivElement> }
-> = ({ data, position: initialPosition, theme, containerRef }) => {
-  const tooltipRef = useRef<HTMLDivElement>(null);
-  const position = useTooltipPosition(
-    initialPosition,
-    tooltipRef,
-    containerRef
+export const Tooltip: React.FC<TooltipProps> = ({
+  data,
+  position: initialPosition,
+  theme,
+  containerRef,
+  boundaryRef,
+  isLeaving,
+  isTransitioning,
+}) => {
+  const [animationState, setAnimationState] = useState<
+    "entering" | "animating" | "entered" | "leaving"
+  >("entering");
+
+  const { x, y, strategy, refs, arrowRef, arrowX, arrowY } = useFloatingTooltip(
+    {
+      initialPosition,
+      boundaryRef,
+      containerRef,
+      placement: "bottom-start",
+    }
   );
-  const [isVisible, setIsVisible] = useState(false);
-  const [isLeaving, setIsLeaving] = useState(false);
-  const timeoutRef = useRef<number>();
-  const prevDataRef = useRef(data);
-  const prevPositionRef = useRef(initialPosition);
-  const [tooltipData, setTooltipData] = useState(data);
-  const [isTransitioning, setIsTransitioning] = useState(false);
 
   useEffect(() => {
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
+    const floating = refs.floating.current;
+    if (!floating) return;
+
+    if (isLeaving) {
+      setAnimationState("leaving");
+      return;
     }
 
-    const hasDataChanged =
-      data?.type !== prevDataRef.current?.type ||
-      data?.hour !== prevDataRef.current?.hour ||
-      data?.date !== prevDataRef.current?.date ||
-      data?.comment !== prevDataRef.current?.comment;
+    floating.classList.add("entering");
+    setAnimationState("entering");
 
-    const hasPositionChanged =
-      initialPosition.x !== prevPositionRef.current.x ||
-      initialPosition.y !== prevPositionRef.current.y;
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        floating.classList.add("animating");
+        setAnimationState("animating");
 
-    if (data) {
-      if ((hasDataChanged || hasPositionChanged) && isVisible) {
-        setIsTransitioning(true);
-
-        if (hasDataChanged) {
-          setTooltipData(data);
-        }
-
-        timeoutRef.current = window.setTimeout(() => {
-          setIsTransitioning(false);
-        }, 300);
-      } else {
-        setTooltipData(data);
-      }
-
-      setIsLeaving(false);
-      setIsVisible(true);
-      prevDataRef.current = data;
-      prevPositionRef.current = initialPosition;
-    } else {
-      setIsLeaving(true);
-      timeoutRef.current = window.setTimeout(() => {
-        setIsVisible(false);
-      }, 300);
-    }
+        setTimeout(() => {
+          floating.classList.remove("entering");
+          floating.classList.add("entered");
+          setAnimationState("entered");
+        }, 200);
+      });
+    });
 
     return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
+      floating.classList.remove("entering", "animating", "entered");
     };
-  }, [data, initialPosition]);
+  }, [refs.floating, isLeaving]);
 
-  useEffect(() => {
-    if (tooltipData && isVisible) {
-      setIsLeaving(false);
-    }
-  }, [tooltipData?.type]);
+  if (!data) return null;
 
-  useEffect(() => {
-    const tooltip = tooltipRef.current;
-    if (!tooltip) return;
-
-    const handleMouseMove = (e: MouseEvent) => {
-      const rect = tooltip.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-
-      tooltip.style.setProperty("--mouse-x", `${x}px`);
-      tooltip.style.setProperty("--mouse-y", `${y}px`);
-    };
-
-    tooltip.addEventListener("mousemove", handleMouseMove);
-    return () => tooltip.removeEventListener("mousemove", handleMouseMove);
-  }, []);
-
-  if (!isVisible || !tooltipData) return null;
-
-  const getSegmentColor = (type: string) => {
-    return theme.colors[type as keyof typeof theme.colors] || theme.colors.life;
-  };
-
-  const formatHour = (hour: number) => {
-    const normalizedHour = hour < 0 ? hour + 24 : hour;
-    const displayHour = String(Math.abs(normalizedHour)).padStart(2, "0");
+  const formatHourDisplay = (hour: number) => {
+    const displayHour = formatHour(hour);
     const isPreviousDay = hour < 0;
-
-    return {
-      displayHour,
-      isPreviousDay,
-    };
+    return { displayHour, isPreviousDay };
   };
 
   return (
     <TooltipContainerDiv
-      ref={tooltipRef}
-      isLeaving={isLeaving}
-      isTransitioning={isTransitioning}
+      ref={refs.setFloating}
+      $isLeaving={isLeaving}
+      $isTransitioning={isTransitioning}
       theme={theme}
+      className={animationState}
       style={{
-        left: position.x,
-        top: position.y,
-        position: "fixed",
-        pointerEvents: "none",
+        position: strategy,
+        top: y ?? initialPosition.y,
+        left: x ?? initialPosition.x,
+        transform: `translate3d(0, ${isLeaving ? "10px" : "0"}, 0)`,
       }}
     >
       <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-        {/* 时间和类型信息 */}
         <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
           <TimeBlockDiv
-            style={{ backgroundColor: getSegmentColor(tooltipData.type) }}
+            style={{ backgroundColor: getSegmentColor(data.type, theme) }}
           >
-            {formatHour(tooltipData.hour).displayHour}
-            {formatHour(tooltipData.hour).isPreviousDay && (
+            {formatHourDisplay(data.hour).displayHour}
+            {formatHourDisplay(data.hour).isPreviousDay && (
               <PreviousDayBadgeDiv theme={theme}>-1d</PreviousDayBadgeDiv>
             )}
           </TimeBlockDiv>
@@ -334,7 +120,7 @@ export const Tooltip: React.FC<
                 color: "rgba(0,0,0,0.75)",
               }}
             >
-              {`${tooltipData.hour}:00`}
+              {`${data.hour}:00`}
             </div>
             <div
               style={{
@@ -350,22 +136,17 @@ export const Tooltip: React.FC<
                   width: "8px",
                   height: "8px",
                   borderRadius: "50%",
-                  backgroundColor: getSegmentColor(tooltipData.type),
+                  backgroundColor: getSegmentColor(data.type, theme),
                 }}
               />
-              {tooltipData.type.charAt(0).toUpperCase() +
-                tooltipData.type.slice(1)}
+              {data.type.charAt(0).toUpperCase() + data.type.slice(1)}
             </div>
           </div>
         </div>
 
-        {/* Comment 区域 */}
-        {tooltipData.comment && (
-          <CommentSection>{tooltipData.comment}</CommentSection>
-        )}
+        {data.comment && <CommentSection>{data.comment}</CommentSection>}
 
-        {/* 分段信息 */}
-        {tooltipData.segment && (
+        {data.segment && (
           <div
             style={{
               padding: "16px",
@@ -400,13 +181,13 @@ export const Tooltip: React.FC<
                     width: "10px",
                     height: "10px",
                     borderRadius: "50%",
-                    color: "rgba(0,0,0)",
                     backgroundColor: getSegmentColor(
-                      tooltipData.segment.mainType
+                      data.segment.mainType,
+                      theme
                     ),
                   }}
                 />
-                {`${tooltipData.segment.startHour}:00 - ${tooltipData.segment.endHour}:00`}
+                {`${data.segment.startHour}:00 - ${data.segment.endHour}:00`}
               </div>
             </div>
 
@@ -416,15 +197,14 @@ export const Tooltip: React.FC<
                   Pattern
                 </div>
                 <div style={{ fontSize: "15px" }}>
-                  {`${tooltipData.segment.type} ${
-                    tooltipData.segment.secondaryType
-                      ? `(${tooltipData.segment.mainType}-${tooltipData.segment.secondaryType})`
-                      : `(${tooltipData.segment.mainType})`
+                  {`${data.segment.type} ${
+                    data.segment.secondaryType
+                      ? `(${data.segment.mainType}-${data.segment.secondaryType})`
+                      : `(${data.segment.mainType})`
                   }`}
                 </div>
               </div>
 
-              {/* 时间分布统计 */}
               <div>
                 <div style={{ fontSize: "13px", color: "rgba(0,0,0,0.5)" }}>
                   Distribution
@@ -436,7 +216,7 @@ export const Tooltip: React.FC<
                     marginTop: "4px",
                   }}
                 >
-                  {Object.entries(tooltipData.segment.distribution || {}).map(
+                  {Object.entries(data.segment.distribution || {}).map(
                     ([type, ratio]) => (
                       <div
                         key={type}
@@ -444,7 +224,7 @@ export const Tooltip: React.FC<
                           flex:
                             typeof ratio === "number" ? ratio.toString() : "1",
                           height: "4px",
-                          backgroundColor: getSegmentColor(type),
+                          backgroundColor: getSegmentColor(type, theme),
                           borderRadius: "2px",
                         }}
                       />
@@ -456,7 +236,6 @@ export const Tooltip: React.FC<
           </div>
         )}
 
-        {/* 快捷键提示 */}
         <div
           style={{
             fontSize: "12px",
@@ -485,6 +264,15 @@ export const Tooltip: React.FC<
           <span>to change type</span>
         </div>
       </div>
+
+      <div
+        className="arrow"
+        ref={arrowRef}
+        style={{
+          left: arrowX != null ? `${arrowX}px` : "",
+          top: arrowY != null ? `${arrowY}px` : "",
+        }}
+      />
     </TooltipContainerDiv>
   );
 };

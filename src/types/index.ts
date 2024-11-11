@@ -108,8 +108,46 @@ export interface DayBoxingGridProps {
   onHover?: (data: HourTooltipData | null, event: React.MouseEvent) => void;
 }
 
-export interface DayRowProps extends Omit<DayBoxingGridProps, "data"> {
+export interface HoverEventHandler {
+  (
+    data: HourTooltipData | null,
+    event: React.MouseEvent,
+    boundaryRef?: React.RefObject<HTMLDivElement>
+  ): void;
+}
+
+export interface SegmentHoverEventHandler {
+  (
+    segment: QHAnalysis | null,
+    event: React.MouseEvent,
+    boundaryRef?: React.RefObject<HTMLDivElement>
+  ): void;
+}
+
+export interface HourRenderProps {
+  hour: HourData;
+  date: string;
+}
+
+export type HourRenderer = (hour: HourData, date: string) => React.ReactNode;
+
+export interface DayRowProps {
   day: DayData;
+  theme: ThemeConfig;
+  direction?: "horizontal" | "vertical";
+  showDateLabel?: boolean;
+  renderDateLabel?: (date: string) => React.ReactNode;
+  renderHour?: HourRenderer; // 使用新的类型
+  onHourChange?: (event: HourChangeEvent) => void;
+  editable?: boolean;
+  customTypes?: {
+    [key: string]: {
+      color: string;
+      label: string;
+    };
+  };
+  onHover?: HoverEventHandler;
+  onSegmentHover?: SegmentHoverEventHandler;
 }
 
 export interface TooltipProps {

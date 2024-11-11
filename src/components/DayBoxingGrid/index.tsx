@@ -1,20 +1,21 @@
 import React from "react";
 import { DayRow } from "./DayRow";
-import { DayBoxingGridProps, QHAnalysis } from "../../types";
+import {
+  DayBoxingGridProps,
+  HoverEventHandler,
+  SegmentHoverEventHandler,
+  HourRenderer,
+} from "../../types";
 
-export interface ExtendedDayBoxingGridProps extends DayBoxingGridProps {
-  customTypes?: {
-    [key: string]: {
-      color: string;
-      label: string;
-    };
-  };
-  onHover?: (data: any, event: React.MouseEvent) => void;
-  onSegmentHover?: (
-    segment: QHAnalysis | null,
-    event: React.MouseEvent
-  ) => void;
+export interface ExtendedDayBoxingGridProps
+  extends Omit<
+    DayBoxingGridProps,
+    "onHover" | "onSegmentHover" | "renderHour"
+  > {
+  onHover?: HoverEventHandler;
+  onSegmentHover?: SegmentHoverEventHandler;
   pinClassName?: string;
+  renderHour?: HourRenderer;
 }
 
 export const DayBoxingGrid: React.FC<ExtendedDayBoxingGridProps> = ({

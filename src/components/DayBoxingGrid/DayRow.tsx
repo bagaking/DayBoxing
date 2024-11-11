@@ -1,29 +1,40 @@
-import React from "react";
+import React, { useRef } from "react";
 import { HourCell } from "./HourCell";
 import { QHSegments } from "./QHSegments";
-import { DayRowProps, HourData, QHAnalysis } from "../../types";
+import {
+  DayRowProps,
+  HourData,
+  QHAnalysis,
+  HourTooltipData,
+  HoverEventHandler,
+  SegmentHoverEventHandler,
+  HourRenderer,
+} from "../../types";
 
-export interface ExtendedDayRowProps extends DayRowProps {
-  onSegmentHover?: (
-    segment: QHAnalysis | null,
-    event: React.MouseEvent
-  ) => void;
+export interface ExtendedDayRowProps
+  extends Omit<DayRowProps, "onHover" | "onSegmentHover"> {
+  onHover?: HoverEventHandler;
+  onSegmentHover?: SegmentHoverEventHandler;
   pinClassName?: string;
+  renderHour?: HourRenderer;
 }
 
 export const DayRow: React.FC<ExtendedDayRowProps> = ({
   day,
   theme,
+  direction = "horizontal",
   showDateLabel,
   renderDateLabel,
   renderHour,
   onHourChange,
-  editable,
+  editable = false,
   customTypes,
   onHover,
   onSegmentHover,
   pinClassName,
 }) => {
+  const rowRef = useRef<HTMLDivElement>(null);
+
   // 将小时分组为每行7个
   const hourRows = day.hours.reduce<HourData[][]>((acc, hour, index) => {
     const rowIndex = Math.floor(index / 7);
@@ -34,12 +45,25 @@ export const DayRow: React.FC<ExtendedDayRowProps> = ({
     return acc;
   }, []);
 
+  const handleHover: HoverEventHandler = (data, event) => {
+    if (onHover) {
+      onHover(data, event, rowRef);
+    }
+  };
+
+  const handleSegmentHover: SegmentHoverEventHandler = (segment, event) => {
+    if (onSegmentHover) {
+      onSegmentHover(segment, event, rowRef);
+    }
+  };
+
   return (
     <div
+      ref={rowRef}
       className={`day-row ${pinClassName}`}
       style={{
         display: "flex",
-        flexDirection: "row",
+        flexDirection: direction === "horizontal" ? "row" : "column",
         alignItems: "flex-start",
         gap: theme.gap * 2,
         marginBottom: theme.gap * 4,
@@ -58,7 +82,7 @@ export const DayRow: React.FC<ExtendedDayRowProps> = ({
           <QHSegments
             segments={day.qhSegments}
             theme={theme}
-            onSegmentHover={onSegmentHover}
+            onSegmentHover={handleSegmentHover}
           />
         </div>
       )}
@@ -111,7 +135,7 @@ export const DayRow: React.FC<ExtendedDayRowProps> = ({
                   customTypes={customTypes}
                   onChange={onHourChange}
                   render={renderHour}
-                  onHover={onHover}
+                  onHover={handleHover}
                 />
               ))}
             </div>

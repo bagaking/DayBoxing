@@ -285,7 +285,7 @@ export const DayBoxing: React.FC<DayBoxingProps> = ({
         <DayAnalysisTooltip
           {...dayTitleTooltip}
           theme={theme}
-          containerRef={containerRef}
+          // containerRef={containerRef}
           onMouseEnter={() => {
             if (tooltipTimeoutRef.current) {
               clearTimeout(tooltipTimeoutRef.current);

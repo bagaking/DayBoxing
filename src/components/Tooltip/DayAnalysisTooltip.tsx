@@ -10,8 +10,9 @@ const OverlayContainer = styled.div<{
 }>`
   position: absolute;
   top: 32px;
-  left: 150px;
+  left: 32px;
   right: 0;
+  max-width: 720px;
   min-height: 120px;
   max-height: calc(100% - 40px);
   backdrop-filter: blur(24px) saturate(180%);
@@ -23,7 +24,7 @@ const OverlayContainer = styled.div<{
   border-radius: ${(props) => props.theme.borderRadius * 1.5}px;
   border: 1px solid
     ${(props) => (props.status === "warning" ? "#faad2044" : "#52c41a44")};
-  padding: 24px;
+  padding: 16px;
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -86,7 +87,7 @@ const TitleRow = styled.div<{ status: AnalysisStatus }>`
   display: flex;
   align-items: center;
   gap: 12px;
-  padding-bottom: 16px;
+  padding-bottom: 12px;
   border-bottom: 1px solid rgba(0, 0, 0, 0.06);
   padding-right: 32px;
 
@@ -99,7 +100,7 @@ const TitleRow = styled.div<{ status: AnalysisStatus }>`
   .title {
     color: ${(props) =>
       props.status === "warning" ? "rgb(250, 173, 20)" : "rgb(82, 196, 26)"};
-    font-size: 14px;
+    font-size: 12px;
     font-weight: 500;
     margin-right: auto;
   }
@@ -138,7 +139,7 @@ const AnalysisContent = styled.div<{
 
   li {
     position: relative;
-    padding: 16px;
+    padding: 6px;
     font-size: 13px;
     line-height: 1.6;
     color: rgba(0, 0, 0, 0.85);
@@ -177,12 +178,6 @@ export const DayAnalysisTooltip: React.FC<DayAnalysisTooltipProps> = ({
   const analysis = analyzeDayOverall(day);
   const today = new Date().toISOString().split("T")[0];
 
-  const getDateStatus = () => {
-    if (day.date === today) return "ongoing";
-    if (day.date > today) return "planning";
-    return "completed";
-  };
-
   const handleMouseEnter = () => {
     setIsHovered(true);
     onMouseEnter?.();
@@ -201,12 +196,6 @@ export const DayAnalysisTooltip: React.FC<DayAnalysisTooltipProps> = ({
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      <CloseButton
-        isVisible={isHovered}
-        onClick={handleMouseLeave}
-        aria-label="关闭分析面板"
-        style={{ top: "12px", right: "12px" }}
-      />
       <TitleRow status={analysis.status}>
         <span className="date">{day.date}</span>
         <span className="title">{analysis.title}</span>
@@ -221,6 +210,12 @@ export const DayAnalysisTooltip: React.FC<DayAnalysisTooltipProps> = ({
           </ul>
         )}
       </AnalysisContent>
+      <CloseButton
+        $isVisible={isHovered}
+        onClick={handleMouseLeave}
+        aria-label="关闭分析面板"
+        style={{ top: "12px", right: "12px" }}
+      />
     </OverlayContainer>
   );
 };

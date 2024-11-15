@@ -294,7 +294,7 @@ export const LegendItem = styled.span<{ color: string }>`
   }
 `;
 
-export const CloseButton = styled.button<{ isVisible: boolean }>`
+export const CloseButton = styled.button<{ $isVisible: boolean }>`
   position: absolute;
   top: 16px;
   right: 16px;
@@ -308,17 +308,14 @@ export const CloseButton = styled.button<{ isVisible: boolean }>`
   background: rgba(0, 0, 0, 0.02);
   border: none;
   cursor: pointer;
+  opacity: ${(props) => (props.$isVisible ? 1 : 0)};
+  transform: ${(props) => (props.$isVisible ? "rotate(0)" : "rotate(-90deg)")};
   transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-  opacity: ${(props) => (props.isVisible ? 1 : 0)};
-  transform: ${(props) =>
-    props.isVisible ? "rotate(0deg)" : "rotate(-90deg)"};
-  pointer-events: ${(props) => (props.isVisible ? "auto" : "none")};
 
   &:hover {
     background: rgba(0, 0, 0, 0.05);
     color: rgba(0, 0, 0, 0.85);
-    transform: ${(props) =>
-      props.isVisible ? "rotate(90deg)" : "rotate(-90deg)"};
+    transform: rotate(90deg);
   }
 
   &::before,
@@ -329,7 +326,6 @@ export const CloseButton = styled.button<{ isVisible: boolean }>`
     height: 1px;
     background: currentColor;
     transform: rotate(45deg);
-    transition: all 0.2s ease;
   }
 
   &::after {

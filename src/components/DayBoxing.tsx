@@ -17,9 +17,7 @@ import {
 import { defaultTheme } from "../theme/default";
 import { useDayBoxingData } from "../hooks/useDayBoxingData";
 import { DayBoxingGrid } from "./DayBoxingGrid";
-import { Tooltip, SegAnalysisTooltip } from "./Tooltip";
-
-const TOOLTIP_CONTAINER_PIN_CLASS_NAME = "tooltip-container-pin";
+import { Tooltip, SegAnalysisTooltip, DayAnalysisTooltip } from "./Tooltip";
 
 interface TooltipState {
   data: HourTooltipData;
@@ -33,6 +31,13 @@ interface SegmentTooltipState {
   days: DayData[];
   position: { x: number; y: number };
   boundaryRef?: React.RefObject<HTMLDivElement>;
+  isLeaving: boolean;
+  isTransitioning: boolean;
+}
+
+interface DayTitleTooltip {
+  day: DayData;
+  position: { x: number; y: number };
   isLeaving: boolean;
   isTransitioning: boolean;
 }
@@ -63,6 +68,9 @@ export const DayBoxing: React.FC<DayBoxingProps> = ({
 
   const [segmentTooltip, setSegmentTooltip] =
     useState<SegmentTooltipState | null>(null);
+
+  const [dayTitleTooltip, setDayTitleTooltip] =
+    useState<DayTitleTooltip | null>(null);
 
   const tooltipTimeoutRef = useRef<number>();
 
@@ -189,6 +197,43 @@ export const DayBoxing: React.FC<DayBoxingProps> = ({
     [editable, typeOrder, updateHour]
   );
 
+  const handleDateTitleHover = useCallback(
+    (day: DayData | null, event: React.MouseEvent) => {
+      if (!day) {
+        if (tooltipTimeoutRef.current) {
+          clearTimeout(tooltipTimeoutRef.current);
+        }
+
+        tooltipTimeoutRef.current = window.setTimeout(() => {
+          setDayTitleTooltip((prev) =>
+            prev ? { ...prev, isLeaving: true } : null
+          );
+          setTimeout(() => {
+            setDayTitleTooltip(null);
+          }, 300);
+        }, 100) as unknown as number;
+
+        return;
+      }
+
+      const rect = (event.target as HTMLElement).getBoundingClientRect();
+      const containerRect = containerRef.current?.getBoundingClientRect();
+
+      if (!containerRect) return;
+
+      setDayTitleTooltip({
+        day,
+        position: {
+          x: rect.left - containerRect.left + rect.width / 2,
+          y: rect.top - containerRect.top + rect.height,
+        },
+        isLeaving: false,
+        isTransitioning: false,
+      });
+    },
+    []
+  );
+
   useEffect(() => {
     return () => {
       if (tooltipTimeoutRef.current) {
@@ -208,7 +253,6 @@ export const DayBoxing: React.FC<DayBoxingProps> = ({
       }}
     >
       <DayBoxingGrid
-        pinClassName={TOOLTIP_CONTAINER_PIN_CLASS_NAME}
         data={daysData}
         direction={direction}
         theme={theme}
@@ -220,6 +264,7 @@ export const DayBoxing: React.FC<DayBoxingProps> = ({
         customTypes={customTypes}
         onHover={handleHourHover}
         onSegmentHover={handleSegmentHover}
+        onDateTitleHover={handleDateTitleHover}
       />
 
       {hourTooltip && (
@@ -233,6 +278,22 @@ export const DayBoxing: React.FC<DayBoxingProps> = ({
           containerRef={containerRef}
           onMouseEnter={handleSegmentTooltipEnter}
           onMouseLeave={handleSegmentLeave}
+        />
+      )}
+
+      {dayTitleTooltip && (
+        <DayAnalysisTooltip
+          {...dayTitleTooltip}
+          theme={theme}
+          containerRef={containerRef}
+          onMouseEnter={() => {
+            if (tooltipTimeoutRef.current) {
+              clearTimeout(tooltipTimeoutRef.current);
+            }
+          }}
+          onMouseLeave={() =>
+            handleDateTitleHover(null, {} as React.MouseEvent)
+          }
         />
       )}
     </div>

@@ -126,7 +126,7 @@ export const SegAnalysisTooltip: React.FC<SegAnalysisTooltipProps> = ({
       <div style={{ margin: "12px 0" }}>
         <div
           style={{
-            color: analysis.type === "warning" ? "#faad14" : "#52c41a",
+            color: analysis.status === "warning" ? "#faad14" : "#52c41a",
             fontSize: "14px",
             fontWeight: 500,
             marginBottom: "8px",

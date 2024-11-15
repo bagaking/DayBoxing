@@ -1,24 +1,9 @@
 import React from "react";
+import { DayBoxingGridProps } from "../../types";
 import { DayRow } from "./DayRow";
-import {
-  DayBoxingGridProps,
-  HoverEventHandler,
-  SegmentHoverEventHandler,
-  HourRenderer,
-} from "../../types";
+import { DateTitle } from "./DateTitle";
 
-export interface ExtendedDayBoxingGridProps
-  extends Omit<
-    DayBoxingGridProps,
-    "onHover" | "onSegmentHover" | "renderHour"
-  > {
-  onHover?: HoverEventHandler;
-  onSegmentHover?: SegmentHoverEventHandler;
-  pinClassName?: string;
-  renderHour?: HourRenderer;
-}
-
-export const DayBoxingGrid: React.FC<ExtendedDayBoxingGridProps> = ({
+export const DayBoxingGrid: React.FC<DayBoxingGridProps> = ({
   data,
   direction,
   theme,
@@ -30,33 +15,33 @@ export const DayBoxingGrid: React.FC<ExtendedDayBoxingGridProps> = ({
   customTypes,
   onHover,
   onSegmentHover,
-  pinClassName,
+  onDateTitleHover,
 }) => {
   return (
-    <div
-      className="day-boxing-grid"
-      style={{
-        display: "flex",
-        flexDirection: direction === "horizontal" ? "column" : "row",
-        gap: theme.gap * 4,
-      }}
-    >
+    <div className="day-boxing-grid">
       {data.map((day) => (
-        <DayRow
-          pinClassName={pinClassName}
-          key={day.date}
-          day={day}
-          direction={direction}
-          theme={theme}
-          showDateLabel={showDateLabel}
-          renderDateLabel={renderDateLabel}
-          renderHour={renderHour}
-          onHourChange={onHourChange}
-          editable={editable}
-          customTypes={customTypes}
-          onHover={onHover}
-          onSegmentHover={onSegmentHover}
-        />
+        <div key={day.date} className="day-container">
+          {showDateLabel && (
+            <DateTitle
+              day={day}
+              theme={theme}
+              onHover={onDateTitleHover}
+              renderDateLabel={renderDateLabel}
+            />
+          )}
+          <DayRow
+            day={day}
+            theme={theme}
+            direction={direction}
+            showDateLabel={false}
+            renderHour={renderHour}
+            onHourChange={onHourChange}
+            editable={editable}
+            customTypes={customTypes}
+            onHover={onHover}
+            onSegmentHover={onSegmentHover}
+          />
+        </div>
       ))}
     </div>
   );

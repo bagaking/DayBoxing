@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { ThemeConfig } from "../../types";
+import { AnalysisStatus, ThemeConfig } from "../../types";
 
 export const TooltipContainerDiv = styled.div<{
   $isLeaving?: boolean;
@@ -143,11 +143,41 @@ export const CommentSection = styled.div`
   }
 `;
 
-export const AnalysisHeader = styled.div`
+export const AnalysisHeader = styled.div<{
+  status?: AnalysisStatus;
+}>`
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 8px;
+  gap: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  margin-bottom: 12px;
+  background: ${(props) =>
+    props.status === "warning"
+      ? "rgba(250, 173, 20, 0.05)"
+      : props.status === "success"
+      ? "rgba(82, 196, 26, 0.05)"
+      : "transparent"};
+  border-radius: ${(props) => props.theme.borderRadius}px;
+  padding: 12px;
+`;
+
+export const HeaderInfo = styled.div`
+  flex: 1;
+
+  h4 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 500;
+    color: rgba(0, 0, 0, 0.85);
+    margin-bottom: 4px;
+  }
+
+  p {
+    margin: 0;
+    font-size: 12px;
+    color: rgba(0, 0, 0, 0.45);
+  }
 `;
 
 export const SegmentBadge = styled.div<{ color: string }>`
@@ -170,11 +200,6 @@ export const SegmentBadge = styled.div<{ color: string }>`
     box-shadow: inset 0 0 0 1px ${(props) => `${props.color}30`},
       0 4px 8px ${(props) => `${props.color}15`};
   }
-`;
-
-export const HeaderInfo = styled.div`
-  flex: 1;
-  min-width: 0;
 `;
 
 export const SegmentTitle = styled.div`
@@ -266,5 +291,48 @@ export const LegendItem = styled.span<{ color: string }>`
     height: 4px;
     background: ${(props) => props.color};
     border-radius: 1px;
+  }
+`;
+
+export const CloseButton = styled.button<{ isVisible: boolean }>`
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 24px;
+  height: 24px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(0, 0, 0, 0.45);
+  background: rgba(0, 0, 0, 0.02);
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  opacity: ${(props) => (props.isVisible ? 1 : 0)};
+  transform: ${(props) =>
+    props.isVisible ? "rotate(0deg)" : "rotate(-90deg)"};
+  pointer-events: ${(props) => (props.isVisible ? "auto" : "none")};
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.05);
+    color: rgba(0, 0, 0, 0.85);
+    transform: ${(props) =>
+      props.isVisible ? "rotate(90deg)" : "rotate(-90deg)"};
+  }
+
+  &::before,
+  &::after {
+    content: "";
+    position: absolute;
+    width: 12px;
+    height: 1px;
+    background: currentColor;
+    transform: rotate(45deg);
+    transition: all 0.2s ease;
+  }
+
+  &::after {
+    transform: rotate(-45deg);
   }
 `;

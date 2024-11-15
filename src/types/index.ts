@@ -105,7 +105,9 @@ export interface DayBoxingGridProps {
       label: string;
     };
   };
-  onHover?: (data: HourTooltipData | null, event: React.MouseEvent) => void;
+  onHover?: HoverEventHandler;
+  onSegmentHover?: SegmentHoverEventHandler;
+  onDateTitleHover?: (day: DayData | null, event: React.MouseEvent) => void;
 }
 
 export interface HoverEventHandler {
@@ -207,7 +209,7 @@ interface SegAnalysisTooltipProps {
 }
 
 // 添加 AnalysisStatus 类型
-export type AnalysisStatus = "success" | "warning" | "normal";
+export type AnalysisStatus = "success" | "warning" | "info" | "fatal";
 
 // 添加 SegmentAnalysis 接口
 export interface SegmentAnalysis {
@@ -217,12 +219,40 @@ export interface SegmentAnalysis {
 
 // 添加 AnalysisResult 接口
 export interface AnalysisResult {
-  type: "success" | "warning";
+  status: AnalysisStatus;
   title: string;
   advices: string[];
-  stats: {
+  stats?: {
     duration: number;
     mainTypePercent: number;
     secondaryTypePercent: number;
   };
+}
+
+// 添加新的分析相关类型
+export interface AnalysisContext {
+  day: DayData;
+  segment?: QHAnalysis;
+  allSegments: QHAnalysis[];
+  historicalDays?: DayData[];
+  stats?: {
+    duration: number;
+    mainTypePercent: number;
+    secondaryTypePercent: number;
+  };
+}
+
+export interface AnalysisRule {
+  id: string;
+  type: "overall" | "feature" | "segment";
+  priority: number;
+  condition: (context: AnalysisContext) => boolean;
+  analyze: (context: AnalysisContext) => AnalysisResult;
+}
+
+export interface AnalysisResult {
+  status: AnalysisStatus;
+  title: string;
+  advices: string[];
+  details?: Record<string, any>;
 }

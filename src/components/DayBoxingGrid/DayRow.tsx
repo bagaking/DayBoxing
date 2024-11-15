@@ -4,8 +4,6 @@ import { QHSegments } from "./QHSegments";
 import {
   DayRowProps,
   HourData,
-  QHAnalysis,
-  HourTooltipData,
   HoverEventHandler,
   SegmentHoverEventHandler,
   HourRenderer,

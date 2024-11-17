@@ -7,8 +7,15 @@ export const TooltipContainerDiv = styled.div<{
   theme: ThemeConfig;
 }>`
   position: fixed;
-  backdrop-filter: blur(8px);
-  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(3px);
+
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.2) 0%,
+    rgba(255, 255, 255, 0.75) 70%,
+    rgba(255, 255, 255, 0.95) 100%
+  );
+
   padding: 20px;
   border-radius: ${(props) => props.theme.borderRadius * 2}px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08),
@@ -20,7 +27,9 @@ export const TooltipContainerDiv = styled.div<{
   transform: ${(props) =>
     props.$isLeaving ? "translateY(10px)" : "translateY(0)"};
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-    transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+    height 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+
   pointer-events: none;
   overflow: hidden;
 

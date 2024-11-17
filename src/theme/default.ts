@@ -6,6 +6,7 @@ export const defaultTheme: ThemeConfig = {
     work: "#60A5FA", // 中蓝色
     life: "#34D399", // 中绿色
     relax: "#FBBF24", // 中黄色
+    improve: "#F472B6", // 中粉色 - 自我提升时间
     background: "#ffffff",
     text: "#1f2937",
   },
@@ -21,6 +22,7 @@ export const lightTheme: Partial<ThemeConfig> = {
     work: "#BFDBFE", // 浅蓝色
     life: "#A7F3D0", // 浅绿色
     relax: "#FDE68A", // 浅黄色
+    improve: "#F472B6", // 浅粉色
     background: "#ffffff",
     text: "#1f2937",
   },
@@ -32,6 +34,7 @@ export const darkTheme: Partial<ThemeConfig> = {
     work: "#3B82F6", // 亮蓝色
     life: "#10B981", // 亮绿色
     relax: "#F59E0B", // 亮黄色
+    improve: "#F472B6", // 亮粉色
     background: "#1F2937",
     text: "#F9FAFB",
   },

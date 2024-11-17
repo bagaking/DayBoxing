@@ -4,7 +4,8 @@ import {
   QHAnalysis,
   PartType,
   HourType,
-  AnalysisStatus,
+  AnalysisResult,
+  AdviceItem,
 } from "../types";
 import { analyzeWithRules } from "./rules";
 
@@ -321,19 +322,6 @@ export const getSegmentStats = (seg: QHAnalysis) => {
     hasSecondary: !!seg.secondaryType,
   };
 };
-
-// 定义分析结果的新类型
-interface AnalysisResult {
-  status: AnalysisStatus;
-  title: string;
-  advices: string[]; // 改为数组以收集所有建议
-  stats: {
-    duration: number;
-    mainTypePercent: number;
-    secondaryTypePercent: number;
-  };
-}
-
 /**
  * Analyze segment characteristics and status
  *
@@ -354,7 +342,12 @@ export const analyzeSegment = (
     return {
       status: "warning",
       title: "无法获取完整数据",
-      advices: ["缺少当天数据，无法进行完整分析"],
+      advices: [
+        {
+          type: "warning",
+          content: "缺少当天数据，无法进行完整分析",
+        },
+      ],
       stats: {
         duration: seg.endHour - seg.startHour,
         mainTypePercent:
@@ -366,6 +359,7 @@ export const analyzeSegment = (
     };
   }
 
+  // 使用规则引擎进行分析
   const analysis = analyzeWithRules(currentDay, seg, days, "segment");
 
   return {
@@ -385,7 +379,11 @@ export const analyzeSegment = (
   };
 };
 
-// 导出工具函数供组件使用
+/**
+ * 获取段落描述
+ * @param seg - 段落分析
+ * @returns 段落描述
+ */
 export const getSegmentDescription = (seg: QHAnalysis): string => {
   if (!seg.secondaryType) return `${seg.mainType} Full Part`;
   if (seg.type === "balance")
@@ -394,6 +392,11 @@ export const getSegmentDescription = (seg: QHAnalysis): string => {
   return `${seg.mainType}-${seg.secondaryType} Mix Part`;
 };
 
+/**
+ * 获取段落类型符号
+ * @param seg - 段落分析
+ * @returns 段落类型符号
+ */
 export const getSegmentTypeSymbol = (seg: QHAnalysis): string => {
   return !seg.secondaryType
     ? "Fu"
@@ -404,10 +407,14 @@ export const getSegmentTypeSymbol = (seg: QHAnalysis): string => {
     : "Mi";
 };
 
+/**
+ * Analyze day overall characteristics
+ */
 export const analyzeDayOverall = (
   day: DayData,
   historicalDays?: DayData[]
 ): AnalysisResult => {
+  // 使用规则引擎进行分析
   const analysis = analyzeWithRules(day, undefined, historicalDays, "overall");
 
   return {
@@ -423,7 +430,7 @@ export const analyzeDayOverall = (
     ],
     stats: {
       duration: day.hours.length,
-      mainTypePercent: 0, // 可以计算主要活动类型的占比
+      mainTypePercent: 0,
       secondaryTypePercent: 0,
     },
   };

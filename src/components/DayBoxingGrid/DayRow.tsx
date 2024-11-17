@@ -7,6 +7,7 @@ import {
   HoverEventHandler,
   SegmentHoverEventHandler,
   HourRenderer,
+  HourType,
 } from "../../types";
 
 export interface ExtendedDayRowProps
@@ -15,6 +16,7 @@ export interface ExtendedDayRowProps
   onSegmentHover?: SegmentHoverEventHandler;
   pinClassName?: string;
   renderHour?: HourRenderer;
+  typeOrder?: readonly HourType[];
 }
 
 export const DayRow: React.FC<ExtendedDayRowProps> = ({
@@ -30,6 +32,7 @@ export const DayRow: React.FC<ExtendedDayRowProps> = ({
   onHover,
   onSegmentHover,
   pinClassName,
+  typeOrder,
 }) => {
   const rowRef = useRef<HTMLDivElement>(null);
 
@@ -99,6 +102,7 @@ export const DayRow: React.FC<ExtendedDayRowProps> = ({
               fontSize: "14px",
               fontWeight: 500,
               marginBottom: theme.gap * 2,
+              color: theme.colors.text,
             }}
           >
             {renderDateLabel ? renderDateLabel(day.date) : day.date}
@@ -131,6 +135,7 @@ export const DayRow: React.FC<ExtendedDayRowProps> = ({
                   theme={theme}
                   editable={editable}
                   customTypes={customTypes}
+                  typeOrder={typeOrder}
                   onChange={onHourChange}
                   render={renderHour}
                   onHover={handleHover}

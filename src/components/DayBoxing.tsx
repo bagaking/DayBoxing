@@ -9,10 +9,13 @@ import {
   DayBoxingProps,
   HourTooltipData,
   HourChangeEvent,
-  QHAnalysis,
+  HourType,
   DayData,
   HoverEventHandler,
   SegmentHoverEventHandler,
+  BaseSegmentTooltipState,
+  DEFAULT_SHORTCUTS,
+  DEFAULT_HOUR_TYPES,
 } from "../types";
 import { defaultTheme } from "../theme/default";
 import { useDayBoxingData } from "../hooks/useDayBoxingData";
@@ -25,14 +28,8 @@ interface TooltipState {
   boundaryRef?: React.RefObject<HTMLDivElement>;
 }
 
-interface SegmentTooltipState {
-  segment: QHAnalysis;
-  allSegments: QHAnalysis[];
-  days: DayData[];
-  position: { x: number; y: number };
+interface SegmentTooltipState extends BaseSegmentTooltipState {
   boundaryRef?: React.RefObject<HTMLDivElement>;
-  isLeaving: boolean;
-  isTransitioning: boolean;
 }
 
 interface DayTitleTooltip {
@@ -45,6 +42,7 @@ interface DayTitleTooltip {
 export const DayBoxing: React.FC<DayBoxingProps> = ({
   patterns,
   dates,
+  style,
   direction = "horizontal",
   theme: customTheme = {},
   showDateLabel = true,
@@ -55,7 +53,6 @@ export const DayBoxing: React.FC<DayBoxingProps> = ({
   shortcuts = {},
   customTypes,
   typeOrder,
-  onPatternEdit,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -82,6 +79,11 @@ export const DayBoxing: React.FC<DayBoxingProps> = ({
     onChange: onHourChange,
   });
 
+  const shortcutMap = {
+    ...DEFAULT_SHORTCUTS,
+    ...shortcuts,
+  };
+
   const handleHourHover: HoverEventHandler = (data, event, boundaryRef) => {
     if (tooltipTimeoutRef.current) {
       clearTimeout(tooltipTimeoutRef.current);
@@ -103,7 +105,7 @@ export const DayBoxing: React.FC<DayBoxingProps> = ({
         data: {
           ...data,
           comment: hourData?.comment,
-          segment: dayData?.segments.find(
+          segment: dayData?.qhSegments?.find(
             (s) => data.hour >= s.startHour && data.hour < s.endHour
           ),
         },
@@ -197,24 +199,9 @@ export const DayBoxing: React.FC<DayBoxingProps> = ({
     [editable, typeOrder, updateHour]
   );
 
-  const handleDateTitleHover = useCallback(
-    (day: DayData | null, event: React.MouseEvent) => {
-      if (!day) {
-        if (tooltipTimeoutRef.current) {
-          clearTimeout(tooltipTimeoutRef.current);
-        }
-
-        tooltipTimeoutRef.current = window.setTimeout(() => {
-          setDayTitleTooltip((prev) =>
-            prev ? { ...prev, isLeaving: true } : null
-          );
-          setTimeout(() => {
-            setDayTitleTooltip(null);
-          }, 300);
-        }, 100) as unknown as number;
-
-        return;
-      }
+  const handleDateTitleClick = useCallback(
+    (day: DayData, event: React.MouseEvent) => {
+      if (!day) return;
 
       const rect = (event.target as HTMLElement).getBoundingClientRect();
       const containerRect = containerRef.current?.getBoundingClientRect();
@@ -224,14 +211,32 @@ export const DayBoxing: React.FC<DayBoxingProps> = ({
       setDayTitleTooltip({
         day,
         position: {
-          x: rect.left - containerRect.left + rect.width / 2,
-          y: rect.top - containerRect.top + rect.height,
+          x: rect.left - containerRect.left,
+          y: rect.bottom - containerRect.top,
         },
         isLeaving: false,
         isTransitioning: false,
       });
     },
     []
+  );
+
+  const handleDayAnalysisClose = useCallback(() => {
+    setDayTitleTooltip(null);
+  }, []);
+
+  const handleKeyPress = useCallback(
+    (event: KeyboardEvent) => {
+      if (!editable || !hourTooltip) return;
+
+      const key = event.key.toLowerCase();
+      const newType = shortcutMap[key];
+
+      if (newType) {
+        updateHour(hourTooltip.data.date, hourTooltip.data.hour, newType);
+      }
+    },
+    [editable, hourTooltip, shortcutMap, updateHour]
   );
 
   useEffect(() => {
@@ -242,6 +247,13 @@ export const DayBoxing: React.FC<DayBoxingProps> = ({
     };
   }, []);
 
+  useEffect(() => {
+    window.addEventListener("keydown", handleKeyPress);
+    return () => {
+      window.removeEventListener("keydown", handleKeyPress);
+    };
+  }, [handleKeyPress]);
+
   return (
     <div
       ref={containerRef}
@@ -250,7 +262,9 @@ export const DayBoxing: React.FC<DayBoxingProps> = ({
         padding: theme.gap * 2,
         position: "relative",
         overflow: "hidden",
+        ...style,
       }}
+      tabIndex={0}
     >
       <DayBoxingGrid
         data={daysData}
@@ -262,9 +276,10 @@ export const DayBoxing: React.FC<DayBoxingProps> = ({
         onHourChange={handleHourClick}
         editable={editable}
         customTypes={customTypes}
+        typeOrder={(typeOrder || DEFAULT_HOUR_TYPES).map((t) => t as HourType)}
         onHover={handleHourHover}
         onSegmentHover={handleSegmentHover}
-        onDateTitleHover={handleDateTitleHover}
+        onDateTitleClick={handleDateTitleClick}
       />
 
       {hourTooltip && (
@@ -285,15 +300,7 @@ export const DayBoxing: React.FC<DayBoxingProps> = ({
         <DayAnalysisTooltip
           {...dayTitleTooltip}
           theme={theme}
-          // containerRef={containerRef}
-          onMouseEnter={() => {
-            if (tooltipTimeoutRef.current) {
-              clearTimeout(tooltipTimeoutRef.current);
-            }
-          }}
-          onMouseLeave={() =>
-            handleDateTitleHover(null, {} as React.MouseEvent)
-          }
+          onMouseLeave={handleDayAnalysisClose}
         />
       )}
     </div>

@@ -2,6 +2,21 @@ import React from "react";
 import { DayBoxingGridProps } from "../../types";
 import { DayRow } from "./DayRow";
 import { DateTitle } from "./DateTitle";
+import styled from "styled-components";
+
+const GridContainer = styled.div<{ theme: any }>`
+  .day-container {
+    margin-bottom: ${(props) => props.theme.gap * 4}px;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  color: ${(props) => props.theme.colors.text};
+  background: ${(props) => props.theme.colors.background};
+  transition: color 0.3s ease, background-color 0.3s ease;
+`;
 
 export const DayBoxingGrid: React.FC<DayBoxingGridProps> = ({
   data,
@@ -13,19 +28,20 @@ export const DayBoxingGrid: React.FC<DayBoxingGridProps> = ({
   onHourChange,
   editable,
   customTypes,
+  typeOrder,
   onHover,
   onSegmentHover,
-  onDateTitleHover,
+  onDateTitleClick,
 }) => {
   return (
-    <div className="day-boxing-grid">
+    <GridContainer theme={theme}>
       {data.map((day) => (
         <div key={day.date} className="day-container">
           {showDateLabel && (
             <DateTitle
               day={day}
               theme={theme}
-              onHover={onDateTitleHover}
+              onClick={onDateTitleClick}
               renderDateLabel={renderDateLabel}
             />
           )}
@@ -38,11 +54,12 @@ export const DayBoxingGrid: React.FC<DayBoxingGridProps> = ({
             onHourChange={onHourChange}
             editable={editable}
             customTypes={customTypes}
+            typeOrder={typeOrder}
             onHover={onHover}
             onSegmentHover={onSegmentHover}
           />
         </div>
       ))}
-    </div>
+    </GridContainer>
   );
 };

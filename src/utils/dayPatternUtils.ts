@@ -1,4 +1,10 @@
-import { DayPattern, TimeBlock, HourType, PatternEditEvent } from "../types";
+import {
+  DayPattern,
+  TimeBlock,
+  HourType,
+  PatternEditEvent,
+  BaseHourType,
+} from "../types";
 
 export const editPattern = (
   pattern: DayPattern,
@@ -46,9 +52,10 @@ export const createHoursFromPattern = (pattern: DayPattern) => {
 
   for (const block of pattern.blocks) {
     if (typeof block === "string") {
+      const hourType = block as HourType;
       hours.push({
         hour: currentHour,
-        type: block as HourType,
+        type: hourType,
       });
       currentHour++;
       continue;
@@ -66,4 +73,68 @@ export const createHoursFromPattern = (pattern: DayPattern) => {
   }
 
   return hours;
+};
+
+export const createCommonPattern = (
+  type: "work" | "improve" | "balanced"
+): DayPattern => {
+  const createBlock = (type: BaseHourType, duration: number) => ({
+    type,
+    duration,
+  });
+
+  switch (type) {
+    case "work":
+      return {
+        startHour: 0,
+        blocks: [
+          createBlock("sleep", 9),
+          createBlock("life", 1),
+          createBlock("work", 2),
+          createBlock("life", 2),
+          createBlock("work", 4),
+          createBlock("life", 1),
+          createBlock("work", 2),
+          createBlock("life", 1),
+          createBlock("relax", 2),
+        ],
+      };
+    case "improve":
+      return {
+        startHour: 0,
+        blocks: [
+          createBlock("sleep", 7),
+          createBlock("life", 1),
+          createBlock("improve", 2),
+          createBlock("work", 2),
+          createBlock("life", 2),
+          createBlock("improve", 2),
+          createBlock("work", 2),
+          createBlock("life", 3),
+          createBlock("relax", 3),
+        ],
+      };
+    case "balanced":
+      return {
+        startHour: 1,
+        blocks: [
+          { type: "sleep", duration: 7 },
+          { type: "life", duration: 1 },
+          "improve",
+          { type: "work", duration: 2 },
+          { type: "life", duration: 2 },
+          { type: "work", duration: 4 },
+          { type: "life", duration: 2 },
+          { type: "work", duration: 2 },
+          "life",
+          "improve",
+          "relax",
+        ],
+      };
+    default:
+      return {
+        startHour: 0,
+        blocks: [],
+      };
+  }
 };

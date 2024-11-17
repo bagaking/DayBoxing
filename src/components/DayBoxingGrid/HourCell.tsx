@@ -1,5 +1,12 @@
-import React, { useRef } from "react";
-import { HourData, HourType, ThemeConfig, HourChangeEvent } from "../../types";
+import React from "react";
+import {
+  HourData,
+  HourType,
+  ThemeConfig,
+  HourChangeEvent,
+  DEFAULT_HOUR_TYPES,
+  HourTooltipData,
+} from "../../types";
 
 export interface HourCellProps {
   hour: HourData;
@@ -12,15 +19,11 @@ export interface HourCellProps {
       label: string;
     };
   };
+  typeOrder?: readonly HourType[];
   onChange?: (event: HourChangeEvent) => void;
   render?: (hour: HourData, date: string) => React.ReactNode;
   onHover?: (
-    data: {
-      hour: number;
-      type: HourType;
-      date: string;
-      comment?: string;
-    } | null,
+    data: Omit<HourTooltipData, "segment" | "previousDay"> | null,
     event: React.MouseEvent
   ) => void;
 }
@@ -31,6 +34,7 @@ export const HourCell: React.FC<HourCellProps> = ({
   theme,
   editable,
   customTypes,
+  typeOrder,
   onChange,
   render,
   onHover,
@@ -64,11 +68,16 @@ export const HourCell: React.FC<HourCellProps> = ({
 
   const handleClick = () => {
     if (!editable || !onChange) return;
+
+    const types = typeOrder || DEFAULT_HOUR_TYPES;
+    const currentIndex = types.indexOf(hour.type as HourType);
+    const nextType = types[(currentIndex + 1) % types.length];
+
     onChange({
       hour: hour.hour,
       date,
       oldType: hour.type,
-      newType: hour.type,
+      newType: nextType,
     });
   };
 

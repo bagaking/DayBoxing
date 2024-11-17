@@ -114,6 +114,10 @@ export const SegmentTypes = styled.div<{ color: string }>`
   margin-bottom: 1px;
   color: ${(props) => props.color};
   transition: color 0.2s ease;
+
+  &[data-type="improve"] {
+    font-style: italic;
+  }
 `;
 
 export const SegmentTime = styled.div`
@@ -152,7 +156,7 @@ export const QHSegments: React.FC<QHSegmentsProps> = ({
             </TypeBlock>
 
             <SegmentContent>
-              <SegmentTypes color={mainColor}>
+              <SegmentTypes color={mainColor} data-type={seg.mainType}>
                 {seg.mainType}
                 {seg.secondaryType && (
                   <>

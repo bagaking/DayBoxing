@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useFloatingTooltip } from "../../hooks/useFloatingTooltip";
 
-import { HourTooltipData, ThemeConfig } from "../../types";
+import { HourTooltipData, ThemeConfig, DEFAULT_SHORTCUTS } from "../../types";
 import { formatHourClip24 as formatHour } from "../../utils/qhAnalysis";
 
 import {
@@ -25,6 +25,11 @@ interface TooltipProps {
 const getSegmentColor = (type: string, theme: ThemeConfig) => {
   return theme.colors[type as keyof typeof theme.colors] || theme.colors.life;
 };
+
+// 使用常量替代硬编码
+const SHORTCUT_KEYS = Object.keys(DEFAULT_SHORTCUTS).map((key) =>
+  key.toUpperCase()
+);
 
 export const Tooltip: React.FC<TooltipProps> = ({
   data,
@@ -247,7 +252,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
           }}
         >
           <span>Press</span>
-          {["S", "W", "L", "R"].map((key) => (
+          {SHORTCUT_KEYS.map((key) => (
             <span
               key={key}
               style={{

@@ -1,8 +1,39 @@
 // Hour types
-export type BaseHourType = "sleep" | "work" | "life" | "relax";
+export type BaseHourType = "sleep" | "work" | "life" | "relax" | "improve";
 
 // Support custom types
 export type HourType = BaseHourType | string;
+
+// 从 BaseHourType 类型中提取所有可能的值
+const HOUR_TYPE_VALUES = ["sleep", "work", "life", "relax", "improve"] as const;
+export const DEFAULT_HOUR_TYPES: readonly BaseHourType[] =
+  Array.from(HOUR_TYPE_VALUES);
+
+// 从 BaseHourType 中提取快捷键映射
+type ShortcutMap = {
+  [K in BaseHourType as K extends string ? K[0] : never]: K;
+};
+
+export const DEFAULT_SHORTCUTS: ShortcutMap = {
+  s: "sleep",
+  w: "work",
+  l: "life",
+  r: "relax",
+  i: "improve",
+} as const;
+
+// 添加时间相关的常量
+export const TIME_CONSTANTS = {
+  MIN_DAY_HOURS: 21,
+  MAX_DAY_HOURS: 28,
+  MIN_SLEEP_HOURS: 6,
+  MAX_SLEEP_HOURS: 9,
+  MIN_WORK_HOURS: 4,
+  MAX_WORK_HOURS: 10,
+  MAX_CONTINUOUS_WORK: 4,
+  MAX_CONTINUOUS_IMPROVE: 4,
+  MIN_LIFE_RATIO: 0.2,
+} as const;
 
 // Part types
 export type PartType = "full" | "mix" | "balance" | "chaos";
@@ -24,6 +55,24 @@ export interface HourData {
   comment?: string;
 }
 
+// 添加 HourTooltipData 接口
+export interface HourTooltipData extends HourData {
+  date: string;
+  segment?: QHAnalysis;
+  previousDay?: {
+    type: HourType;
+    comment?: string;
+  };
+}
+
+// 添加 HourChangeEvent 接口
+export interface HourChangeEvent extends Pick<HourData, "hour"> {
+  date: string;
+  oldType: HourType;
+  newType: HourType;
+  comment?: string;
+}
+
 // Day data
 export interface DayData {
   date: string;
@@ -39,6 +88,7 @@ export interface ThemeConfig {
     work: string;
     life: string;
     relax: string;
+    improve: string;
     background: string;
     text: string;
   };
@@ -47,67 +97,57 @@ export interface ThemeConfig {
   borderRadius: number;
 }
 
-// DayBoxingProps
-export interface DayBoxingProps {
-  patterns: DayPattern[];
-  dates: string[];
+// 基础共享属性
+export interface BaseDayBoxingProps {
   direction?: "horizontal" | "vertical";
-  theme?: Partial<ThemeConfig>;
+  theme?: ThemeConfig;
+  style?: React.CSSProperties;
   showDateLabel?: boolean;
   renderHour?: (hour: HourData, date: string) => React.ReactNode;
   renderDateLabel?: (date: string) => React.ReactNode;
   onHourChange?: (event: HourChangeEvent) => void;
-  onPatternEdit?: (event: PatternEditEvent) => void;
   editable?: boolean;
+  customTypes?: {
+    [key: string]: {
+      color: string;
+      label: string;
+    };
+  };
+  typeOrder?: readonly HourType[];
+}
+
+// DayBoxing 组件属性
+export interface DayBoxingProps extends BaseDayBoxingProps {
+  patterns: DayPattern[];
+  dates: string[];
+  onPatternEdit?: (event: PatternEditEvent) => void;
   shortcuts?: {
     [key: string]: HourType;
   };
-  customTypes?: {
-    [key: string]: {
-      color: string;
-      label: string;
-    };
-  };
-  typeOrder?: HourType[];
 }
 
-// HourTooltipData
-export interface HourTooltipData {
-  hour: number;
-  type: HourType;
-  date: string;
-  segment?: DaySegment;
-  comment?: string;
-}
-
-// Data modification event
-export interface HourChangeEvent {
-  hour: number;
-  date: string;
-  oldType: HourType;
-  newType: HourType;
-  comment?: string;
-}
-
-// 添加新的类型定义
-export interface DayBoxingGridProps {
+// DayBoxingGrid 组件属性
+export interface DayBoxingGridProps
+  extends Required<
+    Pick<
+      BaseDayBoxingProps,
+      "direction" | "theme" | "showDateLabel" | "editable"
+    >
+  > {
   data: DayData[];
-  direction: "horizontal" | "vertical";
-  theme: ThemeConfig;
-  showDateLabel: boolean;
   renderDateLabel?: (date: string) => React.ReactNode;
   renderHour?: (hour: HourData, date: string) => React.ReactNode;
   onHourChange?: (event: HourChangeEvent) => void;
-  editable: boolean;
   customTypes?: {
     [key: string]: {
       color: string;
       label: string;
     };
   };
+  typeOrder?: readonly HourType[];
   onHover?: HoverEventHandler;
   onSegmentHover?: SegmentHoverEventHandler;
-  onDateTitleHover?: (day: DayData | null, event: React.MouseEvent) => void;
+  onDateTitleClick?: (day: DayData, event: React.MouseEvent) => void;
 }
 
 export interface HoverEventHandler {
@@ -174,10 +214,8 @@ export interface QHAnalysis {
 }
 
 // 在已有的类型定义中添加
-export interface TimeBlock {
-  type: HourType;
+export interface TimeBlock extends Omit<HourData, "hour"> {
   duration: number;
-  comment?: string;
 }
 
 export interface DayPattern {
@@ -196,14 +234,21 @@ export interface PatternEditEvent {
   };
 }
 
-interface SegAnalysisTooltipProps {
+// 基础 Segment Tooltip 状态
+export interface BaseSegmentTooltipState {
   segment: QHAnalysis;
   allSegments: QHAnalysis[];
-  days?: DayData[]; // 添加可选的历史数据
+  days: DayData[];
   position: { x: number; y: number };
-  theme: ThemeConfig;
   isLeaving: boolean;
   isTransitioning: boolean;
+}
+
+// 扩展的 Tooltip Props
+export interface SegmentTooltipProps extends BaseSegmentTooltipState {
+  theme: ThemeConfig;
+  containerRef?: React.RefObject<HTMLDivElement>;
+  boundaryRef?: React.RefObject<HTMLDivElement>;
   onMouseEnter?: () => void;
   onMouseLeave?: () => void;
 }
@@ -215,18 +260,6 @@ export type AnalysisStatus = "success" | "warning" | "info" | "fatal";
 export interface SegmentAnalysis {
   status: AnalysisStatus;
   message: string;
-}
-
-// 添加 AnalysisResult 接口
-export interface AnalysisResult {
-  status: AnalysisStatus;
-  title: string;
-  advices: string[];
-  stats?: {
-    duration: number;
-    mainTypePercent: number;
-    secondaryTypePercent: number;
-  };
 }
 
 // 添加新的分析相关类型
@@ -250,9 +283,20 @@ export interface AnalysisRule {
   analyze: (context: AnalysisContext) => AnalysisResult;
 }
 
+export interface AdviceItem {
+  type: "warning" | "suggestion" | "tip";
+  content: string;
+}
+
+// 添加 AnalysisResult 接口
 export interface AnalysisResult {
   status: AnalysisStatus;
   title: string;
-  advices: string[];
+  advices: AdviceItem[];
   details?: Record<string, any>;
+  stats?: {
+    duration: number;
+    mainTypePercent: number;
+    secondaryTypePercent: number;
+  };
 }

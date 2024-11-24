@@ -1,10 +1,20 @@
 # DayBoxing
 
-DayBoxing 是一个基于 React 的时间管理可视化组件库，它实现了 QH 分析法则，帮助你直观地展示和分析每日时间分配。
+DayBoxing 是一个基于 React 的时间管理可视化组件库，用项目内的
+QH/ABCF 模型展示每日时间分配。
+
+## Status
+
+- Current scope: React component library for visualizing day-level time blocks.
+- QH and ABCF are DayBoxing project terms. They describe this package's time
+  segmentation and classification model; they are not external standards.
+- Verified locally:
+  - `pnpm run build`
+  - `npm pack --dry-run`
 
 ## 功能特性
 
-- 🎯 基于 QH 分析法则
+- 🎯 基于项目内 QH/ABCF 模型
   - 支持 A/B/C/F 四段时间分析
   - 自动识别 Full/Mix/Balance/Chaos 四种时间段模式
   - 智能计算时间分布比例
@@ -248,9 +258,11 @@ interface PatternEditEvent {
 }
 ```
 
-## Qh 分析策略
+## QH/ABCF 分析策略
 
-DayBoxing 基于 QH 分析法则，将一天划分为四个时间段（A/B/C/F），用于分析时间分配的合理性。
+DayBoxing 使用项目内定义的 QH/ABCF 模型，将一天划分为四个时间段
+（A/B/C/F），用于描述时间块分布。这里的 QH、ABCF、Full/Mix/Balance/Chaos
+分类是本项目的实现约定，不代表通用时间管理标准。
 
 ### 时间段划分
 

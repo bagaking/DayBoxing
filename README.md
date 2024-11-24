@@ -44,7 +44,7 @@ import { DayBoxing } from '@bagaking/dayboxing';
 
 function App() {
   return (
-    <DayBoxing 
+    <DayBoxing
       patterns={[
         {
           startHour: 0,
@@ -66,7 +66,7 @@ function App() {
 const pattern = {
   startHour: -3,  // 从前一天 21:00 开始
   blocks: [
-    { type: "sleep", duration: 8, comment: "Night sleep" }, 
+    { type: "sleep", duration: 8, comment: "Night sleep" },
     { type: "work", duration: 4, comment: "Morning focus" },
     { type: "life", duration: 1, comment: "Lunch break" },
     { type: "work", duration: 4, comment: "Afternoon work" },
@@ -76,7 +76,7 @@ const pattern = {
 
 function App() {
   return (
-    <DayBoxing 
+    <DayBoxing
       patterns={[pattern]}
       dates={["2024-03-15"]}
       editable={true}
@@ -92,7 +92,7 @@ const pattern = {
   startHour: -3,  // 从前一天 21:00 开始
   blocks: [
     "sleep", "sleep", "sleep", "sleep", "sleep", "sleep",
-    { type: "sleep", duration: 2, comment: "Dream" }, 
+    { type: "sleep", duration: 2, comment: "Dream" },
     { type: "work", duration: 4, comment: "Morning focus" },
     { type: "life", duration: 1, comment: "Lunch break" },
     { type: "work", duration: 4, comment: "Afternoon work" },
@@ -156,10 +156,10 @@ const shortcuts = {
   r: "relax"
 };
 
-<DayBoxing 
+<DayBoxing
   shortcuts={shortcuts}
   editable={true}
-  {...props} 
+  {...props}
 />
 ```
 
@@ -181,10 +181,10 @@ const CustomDateLabel = ({ date }) => (
   </div>
 );
 
-<DayBoxing 
+<DayBoxing
   renderHour={CustomHour}
   renderDateLabel={CustomDateLabel}
-  {...props} 
+  {...props}
 />
 ```
 
@@ -203,10 +203,10 @@ function App() {
   };
 
   return (
-    <DayBoxing 
+    <DayBoxing
       onHourChange={handleHourChange}
       onPatternEdit={handlePatternEdit}
-      {...props} 
+      {...props}
     />
   );
 }

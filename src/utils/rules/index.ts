@@ -1,6 +1,7 @@
 import { overallRules } from "./overallRules";
 import { featureRules } from "./featureRules";
 import { segmentRules } from "./segmentRules";
+import { khTimeRules } from "./khTimeRules";
 import { QHRuleEngine } from "./ruleEngine";
 import { AnalysisContext, DayData, QHAnalysis } from "../../types";
 
@@ -9,7 +10,12 @@ export const createQHRuleEngine = () => {
   const engine = new QHRuleEngine();
 
   // 按照优先级顺序添加规则
-  engine.addRules([...overallRules, ...featureRules, ...segmentRules]);
+  engine.addRules([
+    ...overallRules,
+    ...featureRules,
+    ...khTimeRules,
+    ...segmentRules,
+  ]);
 
   return engine;
 };

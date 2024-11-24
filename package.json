@@ -30,9 +30,10 @@
   "author": "bagaking",
   "license": "MIT",
   "dependencies": {
+    "@bagaking/khtimeunit": "^0.0.1",
+    "@floating-ui/react": "^0.26.9",
     "@floating-ui/react-dom": "^2.1.2",
-    "babel-plugin-styled-components": "^2.1.4",
-    "@floating-ui/react": "^0.26.9"
+    "babel-plugin-styled-components": "^2.1.4"
   },
   "peerDependencies": {
     "react": ">=16.8.0",

@@ -43,7 +43,7 @@ const OverlayContainer = styled.div<{
   left: 0px;
   right: 0;
   max-width: 720px;
-  max-height: calc(100vh - 200px);
+  max-height: calc(100vh - 100px);
   overflow: auto;
 
   backdrop-filter: blur(24px) saturate(180%);

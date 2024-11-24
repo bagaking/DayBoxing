@@ -1,5 +1,11 @@
 import { execFileSync } from "node:child_process";
-import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import {
+  existsSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -127,6 +133,29 @@ for (const [input, expected] of [
 
   run("pnpm", ["install", "--silent", "--ignore-scripts"], { cwd: smokeDir });
   run("pnpm", ["exec", "tsc", "--noEmit"], { cwd: smokeDir });
+
+  const installedPackageRoot = join(
+    smokeDir,
+    "node_modules",
+    "@bagaking",
+    "dayboxing"
+  );
+  const packageJson = JSON.parse(
+    readFileSync(join(installedPackageRoot, "package.json"), "utf8")
+  );
+
+  for (const field of ["main", "module", "types"]) {
+    if (typeof packageJson[field] !== "string") {
+      throw new Error(`package.json is missing string ${field} field`);
+    }
+
+    if (!existsSync(join(installedPackageRoot, packageJson[field]))) {
+      throw new Error(
+        `package.json ${field} file is missing: ${packageJson[field]}`
+      );
+    }
+  }
+
   run("node", ["consumer-runtime.cjs"], { cwd: smokeDir });
 } finally {
   rmSync(packDir, { recursive: true, force: true });

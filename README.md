@@ -19,9 +19,9 @@ DayBoxing 是一个基于 React 的时间管理可视化组件库，它实现了
 ## 安装
 
 ```bash
-npm install @bagaking/dayboxing 
-# or yarn install @bagaking/dayboxing
-# or pnpm install @bagaking/dayboxing
+npm install @bagaking/dayboxing
+# or yarn add @bagaking/dayboxing
+# or pnpm add @bagaking/dayboxing
 ```
 
 ## 基础使用
@@ -87,6 +87,7 @@ const pattern = {
     { type: "relax", duration: 4, comment: "Evening activities" }
   ]
 };
+```
 
 ## 高级特性
 

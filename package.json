@@ -7,6 +7,14 @@
     "registry": "https://registry.npmjs.org/"
   },
   "description": "A React component library for DayBoxing time management visualization",
+  "homepage": "https://github.com/bagaking/DayBoxing#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bagaking/DayBoxing.git"
+  },
+  "bugs": {
+    "url": "https://github.com/bagaking/DayBoxing/issues"
+  },
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
   "types": "index.d.ts",

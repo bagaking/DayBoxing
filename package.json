@@ -2,6 +2,7 @@
   "name": "@bagaking/dayboxing",
   "version": "0.1.21",
   "private": false,
+  "packageManager": "pnpm@9.15.0",
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org/"

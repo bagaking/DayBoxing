@@ -236,12 +236,8 @@ function App() {
 
 ```typescript
 interface DayPattern {
-  startHour?: number;
-  blocks: Array<{
-    type: HourType;
-    duration: number;
-    comment?: string;
-  }>;
+  startHour: number;
+  blocks: (TimeBlock | HourType)[];
 }
 
 type HourType = "sleep" | "work" | "life" | "relax";

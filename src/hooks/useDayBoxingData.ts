@@ -46,7 +46,7 @@ export const useDayBoxingData = ({
           newHours[hourIndex] = {
             ...hourData,
             type: newType,
-            comment: comment || hourData.comment,
+            comment: comment ?? hourData.comment,
           };
 
           // 触发 onChange 回调

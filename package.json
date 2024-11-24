@@ -25,9 +25,12 @@
   ],
   "scripts": {
     "build": "npm run clean && rollup -c && tsc --emitDeclarationOnly",
+    "check": "npm run verify",
     "dev": "rollup -c -w",
+    "pack:dry-run": "npm pack --dry-run",
     "prepublishOnly": "npm run build",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist",
+    "verify": "npm run build && npm run pack:dry-run"
   },
   "keywords": [
     "react",

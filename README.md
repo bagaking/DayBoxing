@@ -9,8 +9,7 @@ QH/ABCF 模型展示每日时间分配。
 - QH and ABCF are DayBoxing project terms. They describe this package's time
   segmentation and classification model; they are not external standards.
 - Verified locally:
-  - `pnpm run build`
-  - `npm pack --dry-run`
+  - `pnpm run verify`
 
 ## 功能特性
 
@@ -122,8 +121,7 @@ pnpm run dev
 发布前建议执行和 CI 一致的检查，确认构建产物与 npm 包内容可用：
 
 ```bash
-pnpm run build
-npm pack --dry-run
+pnpm run verify
 ```
 
 ## 高级特性

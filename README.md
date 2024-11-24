@@ -89,6 +89,30 @@ const pattern = {
 };
 ```
 
+## 本地开发与验证
+
+本仓库使用 pnpm。首次拉取后安装依赖并构建组件库：
+
+```bash
+pnpm install
+pnpm run build
+```
+
+运行示例项目：
+
+```bash
+cd example
+pnpm install
+pnpm run dev
+```
+
+发布前建议执行和 CI 一致的检查，确认构建产物与 npm 包内容可用：
+
+```bash
+pnpm run build
+npm pack --dry-run
+```
+
 ## 高级特性
 
 ### 主题定制

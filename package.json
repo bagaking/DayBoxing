@@ -28,9 +28,10 @@
     "check": "npm run verify",
     "dev": "rollup -c -w",
     "pack:dry-run": "npm pack --dry-run",
+    "smoke:consumer": "node scripts/consumer-smoke.mjs",
     "prepublishOnly": "npm run build",
     "clean": "rm -rf dist",
-    "verify": "npm run build && npm run pack:dry-run"
+    "verify": "npm run build && npm run pack:dry-run && npm run smoke:consumer"
   },
   "keywords": [
     "react",

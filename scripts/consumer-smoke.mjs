@@ -162,6 +162,42 @@ for (const [input, expected] of [
 `
   );
 
+  writeFileSync(
+    join(smokeDir, "unsupported-subpath.cjs"),
+    `try {
+  require("@bagaking/dayboxing/dist/index.js");
+} catch (error) {
+  if (error?.code === "ERR_PACKAGE_PATH_NOT_EXPORTED") {
+    return;
+  }
+
+  throw new Error(
+    \`Unexpected CJS deep-path failure: \${error?.code ?? error?.message ?? error}\`
+  );
+}
+
+throw new Error("Unsupported CJS dist subpath resolved successfully");
+`
+  );
+
+  writeFileSync(
+    join(smokeDir, "unsupported-subpath.mjs"),
+    `try {
+  await import("@bagaking/dayboxing/dist/index.esm.js");
+} catch (error) {
+  if (error?.code === "ERR_PACKAGE_PATH_NOT_EXPORTED") {
+    process.exit(0);
+  }
+
+  throw new Error(
+    \`Unexpected ESM deep-path failure: \${error?.code ?? error?.message ?? error}\`
+  );
+}
+
+throw new Error("Unsupported ESM dist subpath resolved successfully");
+`
+  );
+
   run("pnpm", ["install", "--silent", "--ignore-scripts"], { cwd: smokeDir });
   run("pnpm", ["exec", "tsc", "--noEmit"], { cwd: smokeDir });
 
@@ -192,6 +228,12 @@ for (const [input, expected] of [
     throw new Error('package.json is missing exports["."] field');
   }
 
+  for (const exportPath of Object.keys(packageJson.exports ?? {})) {
+    if (exportPath.startsWith("./dist")) {
+      throw new Error(`dist subpath must not be exported: ${exportPath}`);
+    }
+  }
+
   for (const field of ["types", "import", "require"]) {
     if (typeof rootExports[field] !== "string") {
       throw new Error(`package.json exports["."] is missing string ${field}`);
@@ -206,6 +248,8 @@ for (const [input, expected] of [
 
   run("node", ["consumer-runtime.cjs"], { cwd: smokeDir });
   run("node", ["consumer-runtime.mjs"], { cwd: smokeDir });
+  run("node", ["unsupported-subpath.cjs"], { cwd: smokeDir });
+  run("node", ["unsupported-subpath.mjs"], { cwd: smokeDir });
 } finally {
   rmSync(packDir, { recursive: true, force: true });
   rmSync(smokeDir, { recursive: true, force: true });

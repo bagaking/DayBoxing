@@ -35,6 +35,14 @@ npm install @bagaking/dayboxing
 
 ## 基础使用
 
+### 公开入口
+
+DayBoxing 的公开入口只有 package root：`@bagaking/dayboxing`。示例、类型和
+运行时代码都应从这个入口导入。
+
+`dist/` 是 npm 包内的打包产物目录，不是稳定 public API。不要使用
+`@bagaking/dayboxing/dist/*` 这类深路径导入；后续版本可能调整这些文件名或目录结构。
+
 ### 快速开始
 
 最简单的使用方式是通过 `DayPattern` 的 `blocks` 数组定义模式：

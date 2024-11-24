@@ -1,5 +1,5 @@
 import React from "react";
-import styled from "styled-components";
+import { styled } from "styled-components";
 import { ThemeConfig, DayData } from "../../types";
 
 interface DateTitleProps {

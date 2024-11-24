@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import styled, { css } from "styled-components";
+import { css, styled } from "styled-components";
 import { useFloatingTooltip } from "../../hooks/useFloatingTooltip";
 
 import { HourTooltipData, ThemeConfig, DEFAULT_SHORTCUTS } from "../../types";

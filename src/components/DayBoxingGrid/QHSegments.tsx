@@ -1,6 +1,6 @@
 import React from "react";
 import { QHAnalysis, ThemeConfig } from "../../types";
-import styled from "styled-components";
+import { styled } from "styled-components";
 import {
   getSegmentDescription,
   getSegmentTypeSymbol,

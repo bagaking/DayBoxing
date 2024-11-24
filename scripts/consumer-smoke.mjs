@@ -98,8 +98,21 @@ export function SmokeConsumer() {
 `
   );
 
+  writeFileSync(
+    join(smokeDir, "consumer-runtime.cjs"),
+    `const dayboxing = require("@bagaking/dayboxing");
+
+for (const exportName of ["DayBoxing", "defaultTheme", "DEFAULT_HOUR_TYPES"]) {
+  if (dayboxing[exportName] == null) {
+    throw new Error(\`Missing public export: \${exportName}\`);
+  }
+}
+`
+  );
+
   run("pnpm", ["install", "--silent", "--ignore-scripts"], { cwd: smokeDir });
   run("pnpm", ["exec", "tsc", "--noEmit"], { cwd: smokeDir });
+  run("node", ["consumer-runtime.cjs"], { cwd: smokeDir });
 } finally {
   rmSync(packDir, { recursive: true, force: true });
   rmSync(smokeDir, { recursive: true, force: true });

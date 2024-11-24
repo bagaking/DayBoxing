@@ -2,7 +2,7 @@ import React from "react";
 import { DayBoxingGridProps } from "../../types";
 import { DayRow } from "./DayRow";
 import { DateTitle } from "./DateTitle";
-import styled from "styled-components";
+import { styled } from "styled-components";
 
 const GridContainer = styled.div<{ theme: any }>`
   .day-container {

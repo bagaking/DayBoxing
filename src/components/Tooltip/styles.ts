@@ -1,4 +1,4 @@
-import styled from "styled-components";
+import { styled } from "styled-components";
 import { AnalysisStatus, ThemeConfig } from "../../types";
 
 export const TooltipContainerDiv = styled.div<{

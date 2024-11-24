@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useFloatingTooltip } from "../../hooks/useFloatingTooltip";
 import { ThemeConfig, AnalysisStatus, SegmentTooltipProps } from "../../types";
 import { getSegmentDescription, analyzeSegment } from "../../utils/qhAnalysis";
-import styled from "styled-components";
+import { styled } from "styled-components";
 
 const TooltipContainer = styled.div<{
   $isLeaving?: boolean;

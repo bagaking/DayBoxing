@@ -6,7 +6,7 @@ import {
   DEFAULT_HOUR_TYPES,
 } from "../../types";
 import { analyzeDayOverall } from "../../utils/qhAnalysis";
-import styled from "styled-components";
+import { styled } from "styled-components";
 import { CloseButton } from "./styles";
 
 const ContentArea = styled.div`

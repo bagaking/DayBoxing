@@ -38,7 +38,7 @@ npm install @bagaking/dayboxing
 
 ### 快速开始
 
-最简单的使用方式是通过时间类型数组定义模式：
+最简单的使用方式是通过 `DayPattern` 的 `blocks` 数组定义模式：
 
 ```tsx
 import { DayBoxing } from '@bagaking/dayboxing';
@@ -47,8 +47,11 @@ function App() {
   return (
     <DayBoxing 
       patterns={[
-        // 每个字符串代表一个小时的时间类型
-        ["sleep", "sleep", "sleep", "work", "work", "life", "relax"]
+        {
+          startHour: 0,
+          // 每个字符串代表一个小时的时间类型
+          blocks: ["sleep", "sleep", "sleep", "work", "work", "life", "relax"]
+        }
       ]}
       dates={["2024-03-15"]}
     />
@@ -217,7 +220,7 @@ function App() {
 
 | 属性 | 类型 | 必填 | 默认值 | 描述 |
 |------|------|------|--------|------|
-| patterns | (DayPattern \| string[])[] | ✓ | - | 时间模式数组 |
+| patterns | DayPattern[] | ✓ | - | 时间模式数组 |
 | dates | string[] | ✓ | - | 日期数组 |
 | direction | 'horizontal' \| 'vertical' | | 'horizontal' | 布局方向 |
 | theme | ThemeConfig | | defaultTheme | 主题配置 |

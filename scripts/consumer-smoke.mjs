@@ -5,6 +5,7 @@ import { join } from "node:path";
 
 const root = process.cwd();
 const smokeDir = mkdtempSync(join(tmpdir(), "dayboxing-consumer-"));
+const packDir = mkdtempSync(join(tmpdir(), "dayboxing-pack-"));
 let tarballPath;
 
 function run(command, args, options = {}) {
@@ -21,12 +22,12 @@ function run(command, args, options = {}) {
 }
 
 try {
-  const tarball = execFileSync("npm", ["pack", "--json"], {
+  const tarball = execFileSync("npm", ["pack", "--json", "--pack-destination", packDir], {
     cwd: root,
     encoding: "utf8",
   });
   const [{ filename }] = JSON.parse(tarball);
-  tarballPath = join(root, filename);
+  tarballPath = join(packDir, filename);
 
   writeFileSync(
     join(smokeDir, "package.json"),
@@ -36,14 +37,14 @@ try {
         type: "module",
         dependencies: {
           "@bagaking/dayboxing": tarballPath,
-          "@types/node": "^22.10.5",
-          "@types/react": "^18.2.48",
-          "@types/react-dom": "^18.2.18",
-          "@types/stylis": "^4.2.5",
-          react: "^18.2.0",
-          "react-dom": "^18.2.0",
-          "styled-components": "^6.1.8",
-          typescript: "^5.3.3",
+          "@types/node": "22.8.7",
+          "@types/react": "18.3.12",
+          "@types/react-dom": "18.3.1",
+          "@types/stylis": "4.2.5",
+          react: "18.3.1",
+          "react-dom": "18.3.1",
+          "styled-components": "6.1.13",
+          typescript: "5.6.3",
         },
         devDependencies: {},
       },
@@ -97,11 +98,9 @@ export function SmokeConsumer() {
 `
   );
 
-  run("pnpm", ["install", "--silent"], { cwd: smokeDir });
+  run("pnpm", ["install", "--silent", "--ignore-scripts"], { cwd: smokeDir });
   run("pnpm", ["exec", "tsc", "--noEmit"], { cwd: smokeDir });
 } finally {
-  if (tarballPath) {
-    rmSync(tarballPath, { force: true });
-  }
+  rmSync(packDir, { recursive: true, force: true });
   rmSync(smokeDir, { recursive: true, force: true });
 }

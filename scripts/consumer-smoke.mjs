@@ -107,6 +107,21 @@ for (const exportName of ["DayBoxing", "defaultTheme", "DEFAULT_HOUR_TYPES"]) {
     throw new Error(\`Missing public export: \${exportName}\`);
   }
 }
+
+for (const [input, expected] of [
+  [-25, "23"],
+  [-1, "23"],
+  [0, "00"],
+  [24, "00"],
+  [48, "00"],
+]) {
+  const actual = dayboxing.formatHourClip24(input);
+  if (actual !== expected) {
+    throw new Error(
+      \`formatHourClip24(\${input}) returned \${actual}; expected \${expected}\`
+    );
+  }
+}
 `
   );
 

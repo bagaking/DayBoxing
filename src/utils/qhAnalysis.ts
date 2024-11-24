@@ -287,16 +287,8 @@ export const analyzeQHSegments = (day: DayData): QHAnalysis[] => {
  * @returns 格式化后的时间字符串
  */
 export const formatHourClip24 = (hour: number): string => {
-  // 处理负数时
-  if (hour < 0) {
-    return String(hour + 24).padStart(2, "0");
-  }
-  // 处理超过24小时的时间
-  if (hour >= 24) {
-    return String(hour - 24).padStart(2, "0");
-  }
-  // 正常时间补零
-  return String(hour).padStart(2, "0");
+  const normalizedHour = ((hour % 24) + 24) % 24;
+  return String(normalizedHour).padStart(2, "0");
 };
 
 /**

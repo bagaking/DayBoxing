@@ -12,13 +12,13 @@ export default {
       dir: 'dist',
       format: 'cjs',
       entryFileNames: '[name].js',
-      sourcemap: true,
+      sourcemap: false,
     },
     {
       dir: 'dist',
       format: 'esm',
       entryFileNames: '[name].esm.js',
-      sourcemap: true,
+      sourcemap: false,
     }
   ],
   plugins: [

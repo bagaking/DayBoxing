@@ -9,7 +9,7 @@ import {
   autoUpdate,
   VirtualElement,
 } from "@floating-ui/react";
-import { useEffect, useRef } from "react";
+import { type MutableRefObject, useEffect, useRef } from "react";
 
 /**
  * Props for useFloatingTooltip hook
@@ -31,6 +31,20 @@ interface UseFloatingTooltipProps {
   placement?: Placement;
 }
 
+interface UseFloatingTooltipReturn {
+  x: number;
+  y: number;
+  strategy: "absolute" | "fixed";
+  refs: {
+    floating: MutableRefObject<HTMLElement | null>;
+    setFloating(node: HTMLElement | null): void;
+    setPositionReference(node: VirtualElement | Element | null): void;
+  };
+  arrowRef: MutableRefObject<HTMLDivElement | null>;
+  arrowX: number;
+  arrowY: number;
+}
+
 /**
  * Hook for creating floating tooltips with smooth positioning and transitions
  *
@@ -48,8 +62,8 @@ export const useFloatingTooltip = ({
   offsetDistance = 12,
   pinToContainer = false,
   placement = "bottom",
-}: UseFloatingTooltipProps) => {
-  const arrowRef = useRef(null);
+}: UseFloatingTooltipProps): UseFloatingTooltipReturn => {
+  const arrowRef = useRef<HTMLDivElement | null>(null);
   const positionRef = useRef(initialPosition);
   const floatingRef = useRef<HTMLElement | null>(null);
 

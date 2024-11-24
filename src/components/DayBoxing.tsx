@@ -283,7 +283,12 @@ export const DayBoxing: React.FC<DayBoxingProps> = ({
       />
 
       {hourTooltip && (
-        <Tooltip {...hourTooltip} theme={theme} containerRef={containerRef} />
+        <Tooltip
+          {...hourTooltip}
+          theme={theme}
+          containerRef={containerRef}
+          enableEdit={editable}
+        />
       )}
 
       {segmentTooltip && (

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import styled, { css } from "styled-components";
 import { useFloatingTooltip } from "../../hooks/useFloatingTooltip";
 
 import { HourTooltipData, ThemeConfig, DEFAULT_SHORTCUTS } from "../../types";
@@ -15,11 +16,61 @@ interface TooltipProps {
   data: HourTooltipData | null;
   position: { x: number; y: number };
   theme: ThemeConfig;
+  enableEdit?: boolean;
   containerRef?: React.RefObject<HTMLDivElement>;
   boundaryRef?: React.RefObject<HTMLDivElement>;
   isLeaving?: boolean;
   isTransitioning?: boolean;
 }
+
+const SegmentTitle = styled.div`
+  font-size: 14px;
+  color: rgba(0, 0, 0, 0.5);
+  margin-bottom: 4px;
+`;
+
+const SegmentTitleContainer = styled.div<{ theme: ThemeConfig }>`
+  font-size: 16px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  color: ${({ theme }) => theme.colors.text};
+`;
+
+const SegmentContainer = styled.div<{ theme: ThemeConfig }>`
+  padding: 12px;
+  background-color: rgba(0, 0, 0, 0.02);
+  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+`;
+
+const SegmentPartTitle = styled.div`
+  font-size: 13px;
+  color: rgba(0, 0, 0, 0.5);
+`;
+
+const DistributionBar = styled.div<{
+  $ratio?: number;
+  $type: string;
+  $isActive: boolean;
+  theme: ThemeConfig;
+}>`
+  flex: ${(props) => props.$ratio || 1};
+  height: 6px;
+  background-color: ${(props) => getSegmentColor(props.$type, props.theme)};
+  border-radius: 2px;
+  transition: all 0.3s ease;
+
+  ${(props) =>
+    props.$isActive &&
+    css`
+      transform: scale(1.05);
+      border: 1px solid rgba(0, 0, 0, 0.9);
+      z-index: 1;
+    `}
+`;
 
 // 从 theme 获取颜色
 const getSegmentColor = (type: string, theme: ThemeConfig) => {
@@ -39,6 +90,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
   boundaryRef,
   isLeaving,
   isTransitioning,
+  enableEdit = true,
 }) => {
   const [animationState, setAnimationState] = useState<
     "entering" | "animating" | "entered" | "leaving"
@@ -152,55 +204,26 @@ export const Tooltip: React.FC<TooltipProps> = ({
         {data.comment && <CommentSection>{data.comment}</CommentSection>}
 
         {data.segment && (
-          <div
-            style={{
-              padding: "16px",
-              backgroundColor: "rgba(0,0,0,0.02)",
-              borderRadius: theme.borderRadius,
-              border: "1px solid rgba(0,0,0,0.05)",
-              color: theme.colors.text,
-            }}
-          >
-            <div style={{ marginBottom: "12px" }}>
-              <div
+          <SegmentContainer theme={theme}>
+            <SegmentTitle>Current Segment</SegmentTitle>
+            <SegmentTitleContainer theme={theme}>
+              <span
                 style={{
-                  fontSize: "14px",
-                  color: "rgba(0,0,0,0.5)",
-                  marginBottom: "4px",
+                  width: "10px",
+                  height: "10px",
+                  borderRadius: "50%",
+                  backgroundColor: getSegmentColor(
+                    data.segment.mainType,
+                    theme
+                  ),
                 }}
-              >
-                Current Segment
-              </div>
-              <div
-                style={{
-                  fontSize: "16px",
-                  fontWeight: 500,
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "8px",
-                  color: theme.colors.text,
-                }}
-              >
-                <span
-                  style={{
-                    width: "10px",
-                    height: "10px",
-                    borderRadius: "50%",
-                    backgroundColor: getSegmentColor(
-                      data.segment.mainType,
-                      theme
-                    ),
-                  }}
-                />
-                {`${data.segment.startHour}:00 - ${data.segment.endHour}:00`}
-              </div>
-            </div>
+              />
+              {`${data.segment.startHour}:00 - ${data.segment.endHour}:00`}
+            </SegmentTitleContainer>
 
             <div style={{ display: "grid", gap: "12px" }}>
               <div>
-                <div style={{ fontSize: "13px", color: "rgba(0,0,0,0.5)" }}>
-                  Pattern
-                </div>
+                <SegmentPartTitle>Pattern</SegmentPartTitle>
                 <div style={{ fontSize: "15px" }}>
                   {`${data.segment.type} ${
                     data.segment.secondaryType
@@ -211,9 +234,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
               </div>
 
               <div>
-                <div style={{ fontSize: "13px", color: "rgba(0,0,0,0.5)" }}>
-                  Distribution
-                </div>
+                <SegmentPartTitle>Distribution</SegmentPartTitle>
                 <div
                   style={{
                     display: "flex",
@@ -223,51 +244,50 @@ export const Tooltip: React.FC<TooltipProps> = ({
                 >
                   {Object.entries(data.segment.distribution || {}).map(
                     ([type, ratio]) => (
-                      <div
+                      <DistributionBar
                         key={type}
-                        style={{
-                          flex:
-                            typeof ratio === "number" ? ratio.toString() : "1",
-                          height: "4px",
-                          backgroundColor: getSegmentColor(type, theme),
-                          borderRadius: "2px",
-                        }}
+                        $type={type}
+                        $ratio={typeof ratio === "number" ? ratio : undefined}
+                        $isActive={type === data.type}
+                        theme={theme}
                       />
                     )
                   )}
                 </div>
               </div>
             </div>
-          </div>
+          </SegmentContainer>
         )}
 
-        <div
-          style={{
-            fontSize: "12px",
-            color: "rgba(0,0,0,0.4)",
-            display: "flex",
-            gap: "8px",
-            alignItems: "center",
-            pointerEvents: "none",
-          }}
-        >
-          <span>Press</span>
-          {SHORTCUT_KEYS.map((key) => (
-            <span
-              key={key}
-              style={{
-                padding: "2px 6px",
-                backgroundColor: "rgba(0,0,0,0.05)",
-                borderRadius: "4px",
-                fontSize: "11px",
-                pointerEvents: "none",
-              }}
-            >
-              {key}
-            </span>
-          ))}
-          <span>to change type</span>
-        </div>
+        {enableEdit && (
+          <div
+            style={{
+              fontSize: "12px",
+              color: "rgba(0,0,0,0.4)",
+              display: "flex",
+              gap: "8px",
+              alignItems: "center",
+              pointerEvents: "none",
+            }}
+          >
+            <span>Press</span>
+            {SHORTCUT_KEYS.map((key) => (
+              <span
+                key={key}
+                style={{
+                  padding: "2px 6px",
+                  backgroundColor: "rgba(0,0,0,0.05)",
+                  borderRadius: "4px",
+                  fontSize: "11px",
+                  pointerEvents: "none",
+                }}
+              >
+                {key}
+              </span>
+            ))}
+            <span>to change type</span>
+          </div>
+        )}
       </div>
 
       <div

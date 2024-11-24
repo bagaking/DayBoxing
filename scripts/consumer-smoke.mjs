@@ -131,6 +131,37 @@ for (const [input, expected] of [
 `
   );
 
+  writeFileSync(
+    join(smokeDir, "consumer-runtime.mjs"),
+    `import { DayBoxing, defaultTheme, formatHourClip24 } from "@bagaking/dayboxing";
+
+for (const [exportName, exportValue] of [
+  ["DayBoxing", DayBoxing],
+  ["defaultTheme", defaultTheme],
+  ["formatHourClip24", formatHourClip24],
+]) {
+  if (exportValue == null) {
+    throw new Error(\`Missing public ESM export: \${exportName}\`);
+  }
+}
+
+for (const [input, expected] of [
+  [-25, "23"],
+  [-1, "23"],
+  [0, "00"],
+  [24, "00"],
+  [48, "00"],
+]) {
+  const actual = formatHourClip24(input);
+  if (actual !== expected) {
+    throw new Error(
+      \`formatHourClip24(\${input}) returned \${actual}; expected \${expected}\`
+    );
+  }
+}
+`
+  );
+
   run("pnpm", ["install", "--silent", "--ignore-scripts"], { cwd: smokeDir });
   run("pnpm", ["exec", "tsc", "--noEmit"], { cwd: smokeDir });
 
@@ -156,7 +187,25 @@ for (const [input, expected] of [
     }
   }
 
+  const rootExports = packageJson.exports?.["."];
+  if (rootExports == null || typeof rootExports !== "object") {
+    throw new Error('package.json is missing exports["."] field');
+  }
+
+  for (const field of ["types", "import", "require"]) {
+    if (typeof rootExports[field] !== "string") {
+      throw new Error(`package.json exports["."] is missing string ${field}`);
+    }
+
+    if (!existsSync(join(installedPackageRoot, rootExports[field]))) {
+      throw new Error(
+        `package.json exports["."].${field} file is missing: ${rootExports[field]}`
+      );
+    }
+  }
+
   run("node", ["consumer-runtime.cjs"], { cwd: smokeDir });
+  run("node", ["consumer-runtime.mjs"], { cwd: smokeDir });
 } finally {
   rmSync(packDir, { recursive: true, force: true });
   rmSync(smokeDir, { recursive: true, force: true });

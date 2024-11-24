@@ -125,8 +125,8 @@ pnpm run verify
 ```
 
 `pnpm run verify` 会重新构建、执行 npm pack dry-run，并用打包后的
-tarball 跑 consumer smoke，覆盖导出的类型、CommonJS runtime 入口以及
-package.json 指向的 `main`、`module`、`types` 文件。
+tarball 跑 consumer smoke，覆盖导出的类型、ESM import、CommonJS require、
+以及 package.json 指向的入口文件。
 
 ## 高级特性
 
